@@ -40,7 +40,7 @@ namespace kinematics {
 		virtual bool checkOrderDefect(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points) = 0;
 		virtual bool checkBranchDefect(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points) = 0;
 		virtual bool checkCircuitDefect(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points) = 0;
-		virtual Kinematics constructKinematics(const std::vector<glm::dvec2>& points, const Object2D& body_pts) = 0;
+		virtual Kinematics constructKinematics(const std::vector<glm::dvec2>& points, const Object2D& body_pts, const std::vector<Object2D>& fixed_body_pts) = 0;
 		virtual void updateBodies(Kinematics& kinematics, const Object2D& body_pts) = 0;
 		virtual double calculateCost(Solution& solution, const Object2D& body_pts, const cv::Mat& dist_map, const BBox& dist_map_bbox, double position_error_weight, double orientation_error_weight, double linkage_location_weight, double smoothness_weight, double size_weight) = 0;
 	};

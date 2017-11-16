@@ -280,7 +280,7 @@ namespace kinematics {
 	/**
 	* Construct a linkage.
 	*/
-	Kinematics LinkageSynthesisRRRP::constructKinematics(const std::vector<glm::dvec2>& points, const Object2D& body_pts) {
+	Kinematics LinkageSynthesisRRRP::constructKinematics(const std::vector<glm::dvec2>& points, const Object2D& body_pts, const std::vector<Object2D>& fixed_body_pts) {
 		kinematics::Kinematics kin;
 		kin.diagram.addJoint(boost::shared_ptr<kinematics::PinJoint>(new kinematics::PinJoint(0, true, points[0])));
 		kin.diagram.addJoint(boost::shared_ptr<kinematics::PinJoint>(new kinematics::PinJoint(1, true, points[1])));
@@ -291,8 +291,15 @@ namespace kinematics {
 		kin.diagram.addLink(false, { kin.diagram.joints[1], kin.diagram.joints[3], kin.diagram.joints[4] });
 		kin.diagram.addLink(false, kin.diagram.joints[2], kin.diagram.joints[3]);
 
+		std::vector<Object2D> copied_fixed_body_pts = fixed_body_pts;
+
 		// update the geometry
 		updateBodies(kin, body_pts);
+
+		// add the fixed rigid bodies
+		for (int i = 0; i < copied_fixed_body_pts.size(); i++) {
+			kin.diagram.addBody(kin.diagram.joints[0], kin.diagram.joints[1], copied_fixed_body_pts[i]);
+		}
 
 		return kin;
 	}
@@ -480,16 +487,8 @@ namespace kinematics {
 	}
 
 	bool LinkageSynthesisRRRP::checkCollision(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const std::vector<Object2D>& fixed_body_pts, const Object2D& body_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, glm::dvec2& slider_end_pos1, glm::dvec2& slider_end_pos2) {
-		kinematics::Kinematics kinematics(0.02);
-
-		// construct a linkage
-		kinematics.diagram.addJoint(boost::shared_ptr<PinJoint>(new PinJoint(0, true, points[0])));
-		kinematics.diagram.addJoint(boost::shared_ptr<PinJoint>(new PinJoint(1, true, points[1])));
-		kinematics.diagram.addJoint(boost::shared_ptr<PinJoint>(new PinJoint(2, false, points[2])));
-		kinematics.diagram.addJoint(boost::shared_ptr<SliderHinge>(new SliderHinge(3, false, points[3])));
-		kinematics.diagram.addLink(true, kinematics.diagram.joints[0], kinematics.diagram.joints[2]);
-		kinematics.diagram.addLink(false, kinematics.diagram.joints[1], kinematics.diagram.joints[3]);
-		kinematics.diagram.addLink(false, kinematics.diagram.joints[2], kinematics.diagram.joints[3]);
+		kinematics::Kinematics kinematics = constructKinematics(points, body_pts, fixed_body_pts);
+		kinematics.diagram.initialize();
 
 		// set the initial point of slider and direction
 		glm::dvec2 orig_slider_pos = points[3];
@@ -498,14 +497,6 @@ namespace kinematics {
 		slider_end_pos2 = points[3];
 		double slider_min_dist = 0;
 		double slider_max_dist = 0;
-
-		// set the geometry
-		for (int i = 0; i < fixed_body_pts.size(); i++) {
-			kinematics.diagram.addBody(kinematics.diagram.joints[0], kinematics.diagram.joints[1], fixed_body_pts[i]);
-		}
-		kinematics.diagram.addBody(kinematics.diagram.joints[2], kinematics.diagram.joints[3], body_pts);
-
-		kinematics.diagram.initialize();
 
 		// calculate the rotational angle of the driving crank for 1st, 2nd, and last poses
 		// i.e., angles[0] = first pose, angles[1] = second pose, angles[2] = last pose
