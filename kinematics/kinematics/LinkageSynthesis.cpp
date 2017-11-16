@@ -106,11 +106,13 @@ namespace kinematics {
 
 		std::vector<Particle> particles(solutions.size());
 
+		double max_cost = 0;
 		for (int i = 0; i < solutions.size(); i++) {
 			double cost = calculateCost(solutions[i], body_pts, dist_map, dist_map_bbox, position_error_weight, orientation_error_weight, linkage_location_weight, smoothness_weight, size_weight);
+			max_cost = std::max(max_cost, cost);
 			particles[i] = Particle(cost, solutions[i]);
 		}
-		//resample(particles, num_particles, particles);
+		//resample(particles, num_particles, particles, max_cost);
 
 		QFile file("particle_filter.txt");
 		file.open(QIODevice::WriteOnly);
@@ -162,7 +164,7 @@ namespace kinematics {
 			new_particles.insert(new_particles.end(), particles.begin(), particles.end());
 
 			// calculate the weights of particles
-			resample(new_particles, num_particles, particles);
+			resample(new_particles, num_particles, particles, max_cost);
 
 			if (record_file) {
 				std::vector<double> values;
@@ -189,7 +191,7 @@ namespace kinematics {
 		}
 	}
 
-	void LinkageSynthesis::resample(std::vector<Particle> particles, int N, std::vector<Particle>& resampled_particles) {
+	void LinkageSynthesis::resample(std::vector<Particle> particles, int N, std::vector<Particle>& resampled_particles, double max_cost) {
 		// calculate the weights of particles
 		std::vector<double> weights(particles.size());
 		double weight_total = 0.0;
@@ -199,7 +201,7 @@ namespace kinematics {
 				w = 0;
 			}
 			else {
-				w = std::exp(-particles[i].cost * 10);
+				w = std::exp(-particles[i].cost / max_cost * 20);
 			}
 			if (i == 0) {
 				weights[i] = w;
