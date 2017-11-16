@@ -212,16 +212,20 @@ void MainWindow::onCalculateSolution4RLinkage() {
 			std::make_pair(dlg.ui.lineEditStdDevPositionLast->text().toDouble(), dlg.ui.lineEditStdDevOrientationLast->text().toDouble())
 		};
 
+		std::vector<double> weights = {
+			dlg.ui.lineEditPositionErrorWeight->text().toDouble(),
+			dlg.ui.lineEditOrientationErrorWeight->text().toDouble(),
+			dlg.ui.lineEditLinkageLocationWeight->text().toDouble(),
+			dlg.ui.lineEditTrajectoryWeight->text().toDouble(),
+			dlg.ui.lineEditSizeWeight->text().toDouble()
+		};
+
 		canvas->calculateSolutions(canvas::Canvas::LINKAGE_4R, 
 			dlg.ui.lineEditNumSamples->text().toInt(),
 			sigmas,
 			dlg.ui.checkBoxAvoidBranchDefect->isChecked(),
 			dlg.ui.checkBoxRotatableCrank->isChecked(),
-			dlg.ui.lineEditPositionErrorWeight->text().toDouble(),
-			dlg.ui.lineEditOrientationErrorWeight->text().toDouble(),
-			dlg.ui.lineEditLinkageLocationWeight->text().toDouble(),
-			dlg.ui.lineEditTrajectoryWeight->text().toDouble(),
-			dlg.ui.lineEditSizeWeight->text().toDouble(),
+			weights,
 			dlg.ui.lineEditNumParticles->text().toInt(),
 			dlg.ui.lineEditNumIterations->text().toInt(),
 			dlg.ui.checkBoxRecordFile->isChecked());
@@ -237,16 +241,20 @@ void MainWindow::onCalculateSolutionSliderCrank() {
 			std::make_pair(dlg.ui.lineEditStdDevPositionLast->text().toDouble(), dlg.ui.lineEditStdDevOrientationLast->text().toDouble())
 		};
 
+		std::vector<double> weights = {
+			dlg.ui.lineEditPositionErrorWeight->text().toDouble(),
+			dlg.ui.lineEditOrientationErrorWeight->text().toDouble(),
+			dlg.ui.lineEditLinkageLocationWeight->text().toDouble(),
+			dlg.ui.lineEditTrajectoryWeight->text().toDouble(),
+			dlg.ui.lineEditSizeWeight->text().toDouble()
+		};
+
 		canvas->calculateSolutions(canvas::Canvas::LINKAGE_RRRP,
 			dlg.ui.lineEditNumSamples->text().toInt(), 
 			sigmas,
 			dlg.ui.checkBoxAvoidBranchDefect->isChecked(),
 			dlg.ui.checkBoxRotatableCrank->isChecked(),
-			dlg.ui.lineEditPositionErrorWeight->text().toDouble(),
-			dlg.ui.lineEditOrientationErrorWeight->text().toDouble(),
-			dlg.ui.lineEditLinkageLocationWeight->text().toDouble(),
-			dlg.ui.lineEditTrajectoryWeight->text().toDouble(),
-			dlg.ui.lineEditSizeWeight->text().toDouble(),
+			weights,
 			dlg.ui.lineEditNumParticles->text().toInt(),
 			dlg.ui.lineEditNumIterations->text().toInt(),
 			dlg.ui.checkBoxRecordFile->isChecked());
