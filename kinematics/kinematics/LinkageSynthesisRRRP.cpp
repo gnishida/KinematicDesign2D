@@ -57,22 +57,9 @@ namespace kinematics {
 				//       for the particle filter, the initial joints are used to optimize, so we want to differentiate these two cases.
 				//points[1] = points[3];
 
-
-				//////////////////////////////////////////////////////////////////////////////////////////////
-				// DEBUG
-				/*
-				points[0] = glm::dvec2(26.5742, 14.5953);
-				points[1] = glm::dvec2(20.9969, 14.4981);
-				points[2] = glm::dvec2(31.4632, 11.8095);
-				points[3] = glm::dvec2(18.7982, 11.8076);
-				points[4] = glm::dvec2(11.6889, 3.10791);
-				*/
-				//////////////////////////////////////////////////////////////////////////////////////////////
-
 				if (!optimizeCandidate(perturbed_poses, enlarged_linkage_region_pts, enlarged_bbox, points)) continue;
 
 				// check hard constraints
-				std::vector<std::vector<int>> zorder;
 				if (!checkHardConstraints(points, perturbed_poses, enlarged_linkage_region_pts, linkage_avoidance_pts, fixed_body_pts, body_pts, rotatable_crank, avoid_branch_defect, min_link_length)) continue;
 
 				solutions.push_back(Solution(points, position_error, orientation_error, perturbed_poses));
@@ -695,12 +682,12 @@ namespace kinematics {
 			type = 3;
 			angles[2] += M_PI * 2;
 		}
-		else if (angles[0] < 0 && angles[1] >= 0 && angles[2] >= 0 && angles[1] >= angles[2]) {
+		else if (angles[0] < 0 && angles[1] >= 0 && angles[2] >= 0 && (poses.size() >= 3 && angles[1] >= angles[2] || poses.size() == 2 && angles[1] - angles[0] > M_PI)) {
 			type = 4;
 			angles[1] -= M_PI * 2;
 			angles[2] -= M_PI * 2;
 		}
-		else if (angles[0] >= 0 && angles[1] < 0 && angles[2] < 0 && angles[1] < angles[2]) {
+		else if (angles[0] >= 0 && angles[1] < 0 && angles[2] < 0 && (poses.size() >= 3 && angles[1] < angles[2] || poses.size() == 2 && angles[0] - angles[1] > M_PI)) {
 			type = 5;
 			angles[1] += M_PI * 2;
 			angles[2] += M_PI * 2;
