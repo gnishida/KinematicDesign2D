@@ -1,19 +1,34 @@
 #include "BodyGeometry.h"
 #include "Joint.h"
 #include "KinematicUtils.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace kinematics {
 
-	BodyGeometry::BodyGeometry(boost::shared_ptr<Joint> pivot1, boost::shared_ptr<Joint> pivot2, const Polygon2D& polygon) : pivot1(pivot1), pivot2(pivot2), polygons(polygon) {
+	BodyGeometry::BodyGeometry(boost::shared_ptr<Joint> pivot1, boost::shared_ptr<Joint> pivot2, const Polygon25D& polygon) : pivot1(pivot1), pivot2(pivot2), polygons(polygon) {
 	}
 
-	BodyGeometry::BodyGeometry(boost::shared_ptr<Joint> pivot1, boost::shared_ptr<Joint> pivot2, const Object2D& polygons) : pivot1(pivot1), pivot2(pivot2), polygons(polygons) {
+	BodyGeometry::BodyGeometry(boost::shared_ptr<Joint> pivot1, boost::shared_ptr<Joint> pivot2, const Object25D& polygons) : pivot1(pivot1), pivot2(pivot2), polygons(polygons) {
 	}
 
 	/**
-	 * Get the actual coordinates of the body geometry.
-	 * Note that "points" store the original coordinates in the model coordinate system.
-	 */
+	* Convert the coordinates to the local coordinate system.
+	*/
+	glm::dvec2 BodyGeometry::worldToLocal(const glm::dvec2& pt) {
+		return getWorldToLocalModel() * glm::dvec3(pt, 1);
+	}
+
+	/**
+	* Convert the local coordinates to the world coordinate system.
+	*/
+	glm::dvec2 BodyGeometry::localToWorld(const glm::dvec2& pt) {
+		return getLocalToWorldModel() * glm::dvec3(pt, 1);
+	}
+
+	/**
+	* Get the actual coordinates of the body geometry.
+	* Note that "points" store the original coordinates in the model coordinate system.
+	*/
 	std::vector<std::vector<glm::dvec2>> BodyGeometry::getActualPoints() {
 		std::vector<std::vector<glm::dvec2>> actual_points(polygons.size());
 
@@ -23,6 +38,22 @@ namespace kinematics {
 			for (int k = 0; k < polygons[i].points.size(); ++k) {
 				actual_points[i].push_back(model * glm::dvec3(polygons[i].points[k], 1));
 			}
+		}
+
+		return actual_points;
+	}
+
+	size_t BodyGeometry::size() const {
+		return polygons.size();
+	}
+
+	std::vector<glm::dvec2> BodyGeometry::getActualPoints(int index) {
+		std::vector<glm::dvec2> actual_points;
+
+		glm::dmat3x2 model = getLocalToWorldModel();
+
+		for (int k = 0; k < polygons[index].points.size(); ++k) {
+			actual_points.push_back(model * glm::dvec3(polygons[index].points[k], 1));
 		}
 
 		return actual_points;

@@ -12,45 +12,45 @@
 
 namespace kinematics {
 
-	class Polygon2D {
+	class Polygon25D {
 	public:
 		std::vector<glm::dvec2> points;
 		bool check_collision;
 
 	public:
-		Polygon2D() : check_collision(false) {}
-		Polygon2D(const std::vector<glm::dvec2>& points, bool check_collision = true) : points(points), check_collision(check_collision) {}
+		Polygon25D() : check_collision(false) {}
+		Polygon25D(const std::vector<glm::dvec2>& points, bool check_collision = true) : points(points), check_collision(check_collision) {}
 	};
 
-	class Object2D {
+	class Object25D {
 	public:
-		std::vector<Polygon2D> polygons;
-		Polygon2D operator[](int index) const {
+		std::vector<Polygon25D> polygons;
+		Polygon25D operator[](int index) const {
 			return polygons[index];
 		}
-		Polygon2D& operator[](int index) {
+		Polygon25D& operator[](int index) {
 			return polygons[index];
 		}
-		void push_back(const Polygon2D& polygon) {
+		void push_back(const Polygon25D& polygon) {
 			polygons.push_back(polygon);
 		}
 		size_t size() const {
 			return polygons.size();
 		}
-		Polygon2D& back() {
+		Polygon25D& back() {
 			return polygons.back();
 		}
-		Polygon2D back() const {
+		Polygon25D back() const {
 			return polygons.back();
 		}
 
 	public:
-		Object2D() {}
-		Object2D(const Polygon2D& polygon) {
+		Object25D() {}
+		Object25D(const Polygon25D& polygon) {
 			polygons.push_back(polygon);
 		}
-		Object2D(const std::vector<glm::dvec2>& points) {
-			polygons.push_back(Polygon2D(points));
+		Object25D(const std::vector<glm::dvec2>& points) {
+			polygons.push_back(Polygon25D(points));
 		}
 	};
 

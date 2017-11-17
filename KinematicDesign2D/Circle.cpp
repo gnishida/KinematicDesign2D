@@ -84,7 +84,6 @@ namespace canvas {
 	QDomElement Circle::toXml(QDomDocument& doc, const QString& node_name) const {
 		QDomElement shape_node = doc.createElement(node_name);
 		shape_node.setAttribute("type", "circle");
-		shape_node.setAttribute("subtype", subtype);
 
 		QDomElement pose_node = doc.createElement("pose");
 		pose_node.setAttribute("x", pos.x);

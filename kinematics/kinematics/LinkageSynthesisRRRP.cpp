@@ -16,7 +16,7 @@ namespace kinematics {
 	* @param solutions1	the output solutions for the driving crank, each of which contains a pair of the center point and the circle point
 	* @param solutions2	the output solutions for the follower, each of which contains a pair of the fixed point and the slider point
 	*/
-	void LinkageSynthesisRRRP::calculateSolution(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, int num_samples, const std::vector<Object2D>& fixed_body_pts, const Object2D& body_pts, std::vector<std::pair<double, double>>& sigmas, bool rotatable_crank, bool avoid_branch_defect, double min_link_length, std::vector<Solution>& solutions, std::vector<glm::dvec2>& enlarged_linkage_region_pts) {
+	void LinkageSynthesisRRRP::calculateSolution(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, int num_samples, const std::vector<Object25D>& fixed_body_pts, const Object25D& body_pts, std::vector<std::pair<double, double>>& sigmas, bool rotatable_crank, bool avoid_branch_defect, double min_link_length, std::vector<Solution>& solutions, std::vector<glm::dvec2>& enlarged_linkage_region_pts) {
 		solutions.clear();
 
 		srand(0);
@@ -26,7 +26,7 @@ namespace kinematics {
 		glm::dvec2 bbox_center = bbox.center();
 
 		int cnt = 0;
-		for (int scale = 1; scale <= 5 && cnt < num_samples; scale++) {
+		for (int scale = 1; scale <= 3 && cnt == 0; scale++) {
 			// calculate the enlarged linkage region for the sampling region
 			enlarged_linkage_region_pts.clear();
 			for (int i = 0; i < linkage_region_pts.size(); i++) {
@@ -186,10 +186,6 @@ namespace kinematics {
 		return true;
 	}
 
-	/**
-	 * Sample a slider.
-	 * A0 and A2 are fixed joints, whereas A1 is a PR joint.
-	 */
 	bool LinkageSynthesisRRRP::optimizeSlider(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const BBox& bbox, glm::dvec2& A0, glm::dvec2& A1) {
 		// setup the initial parameters for optimization
 		column_vector starting_point(4);
@@ -256,7 +252,7 @@ namespace kinematics {
 
 	}
 
-	Solution LinkageSynthesisRRRP::findBestSolution(const std::vector<glm::dmat3x3>& poses, std::vector<Solution>& solutions, const std::vector<glm::dvec2>& linkage_region_pts, const cv::Mat& dist_map, const BBox& dist_map_bbox, const std::vector<glm::dvec2>& linkage_avoidance_pts, const std::vector<Object2D>& fixed_body_pts, const Object2D& body_pts, bool rotatable_crank, bool avoid_branch_defect, double min_link_length, const std::vector<double>& weights, int num_particles, int num_iterations, bool record_file) {
+	Solution LinkageSynthesisRRRP::findBestSolution(const std::vector<glm::dmat3x3>& poses, std::vector<Solution>& solutions, const std::vector<glm::dvec2>& linkage_region_pts, const cv::Mat& dist_map, const BBox& dist_map_bbox, const std::vector<glm::dvec2>& linkage_avoidance_pts, const std::vector<Object25D>& fixed_body_pts, const Object25D& body_pts, bool rotatable_crank, bool avoid_branch_defect, double min_link_length, const std::vector<double>& weights, int num_particles, int num_iterations, bool record_file) {
 		// select the best solution based on the objective function
 		if (solutions.size() > 0) {
 			particleFilter(solutions, linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts, fixed_body_pts, body_pts, rotatable_crank, avoid_branch_defect, min_link_length, weights, num_particles, num_iterations, record_file);
@@ -267,7 +263,7 @@ namespace kinematics {
 		}
 	}
 
-	double LinkageSynthesisRRRP::calculateCost(Solution& solution, const Object2D& body_pts, const cv::Mat& dist_map, const BBox& dist_map_bbox, const std::vector<double>& weights) {
+	double LinkageSynthesisRRRP::calculateCost(Solution& solution, const Object25D& body_pts, const cv::Mat& dist_map, const BBox& dist_map_bbox, const std::vector<double>& weights) {
 		double dist = 0;
 		for (int i = 0; i < solution.points.size(); i++) {
 			dist += dist_map.at<double>(solution.points[i].y - dist_map_bbox.minPt.y, solution.points[i].x - dist_map_bbox.minPt.x);
@@ -281,7 +277,7 @@ namespace kinematics {
 	/**
 	* Construct a linkage.
 	*/
-	Kinematics LinkageSynthesisRRRP::constructKinematics(const std::vector<glm::dvec2>& points, const Object2D& body_pts, const std::vector<Object2D>& fixed_body_pts) {
+	Kinematics LinkageSynthesisRRRP::constructKinematics(const std::vector<glm::dvec2>& points, const Object25D& body_pts, const std::vector<Object25D>& fixed_body_pts) {
 		kinematics::Kinematics kin;
 		kin.diagram.addJoint(boost::shared_ptr<kinematics::PinJoint>(new kinematics::PinJoint(0, true, points[0])));
 		kin.diagram.addJoint(boost::shared_ptr<kinematics::PinJoint>(new kinematics::PinJoint(1, true, points[1])));
@@ -292,7 +288,7 @@ namespace kinematics {
 		kin.diagram.addLink(false, { kin.diagram.joints[1], kin.diagram.joints[3], kin.diagram.joints[4] });
 		kin.diagram.addLink(false, kin.diagram.joints[2], kin.diagram.joints[3]);
 
-		std::vector<Object2D> copied_fixed_body_pts = fixed_body_pts;
+		std::vector<Object25D> copied_fixed_body_pts = fixed_body_pts;
 
 		// update the geometry
 		updateBodies(kin, body_pts);
@@ -308,12 +304,12 @@ namespace kinematics {
 	/**
 	* update bodies.
 	*/
-	void LinkageSynthesisRRRP::updateBodies(Kinematics& kin, const Object2D& body_pts) {
+	void LinkageSynthesisRRRP::updateBodies(Kinematics& kin, const Object25D& body_pts) {
 		kin.diagram.bodies.clear();
 		kin.diagram.addBody(kin.diagram.joints[2], kin.diagram.joints[3], body_pts);
 	}
 
-	bool LinkageSynthesisRRRP::checkHardConstraints(std::vector<glm::dvec2>& points, const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, const std::vector<Object2D>& fixed_body_pts, const Object2D& body_pts, bool rotatable_crank, bool avoid_branch_defect, double min_link_length) {
+	bool LinkageSynthesisRRRP::checkHardConstraints(std::vector<glm::dvec2>& points, const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, const std::vector<Object25D>& fixed_body_pts, const Object25D& body_pts, bool rotatable_crank, bool avoid_branch_defect, double min_link_length) {
 		glm::dvec2 slider_dir = points[3] - points[1];
 
 		// check hard constraints
@@ -487,7 +483,7 @@ namespace kinematics {
 		return false;
 	}
 
-	bool LinkageSynthesisRRRP::checkCollision(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const std::vector<Object2D>& fixed_body_pts, const Object2D& body_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, glm::dvec2& slider_end_pos1, glm::dvec2& slider_end_pos2) {
+	bool LinkageSynthesisRRRP::checkCollision(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const std::vector<Object25D>& fixed_body_pts, const Object25D& body_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, glm::dvec2& slider_end_pos1, glm::dvec2& slider_end_pos2) {
 		kinematics::Kinematics kinematics = constructKinematics(points, body_pts, fixed_body_pts);
 		kinematics.diagram.initialize();
 
@@ -643,7 +639,7 @@ namespace kinematics {
 		return false;
 	}
 
-	double LinkageSynthesisRRRP::tortuosityOfTrajectory(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const Object2D& body_pts) {
+	double LinkageSynthesisRRRP::tortuosityOfTrajectory(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const Object25D& body_pts) {
 		// calculate the local coordinates of the body points
 		glm::dmat3x3 inv_pose0 = glm::inverse(poses[0]);
 		std::vector<glm::dvec2> body_pts_local(body_pts.polygons[0].points.size());
@@ -655,8 +651,8 @@ namespace kinematics {
 		double length_of_straight = 0.0;
 		std::vector<glm::dvec2> prev_body_pts = body_pts.polygons[0].points;
 		for (int i = 1; i < poses.size(); i++) {
-			std::vector<glm::dvec2> next_body_pts(body_pts.size());
-			for (int k = 0; k < body_pts.size(); k++) {
+			std::vector<glm::dvec2> next_body_pts(body_pts.polygons[0].points.size());
+			for (int k = 0; k < body_pts.polygons[0].points.size(); k++) {
 				next_body_pts[k] = glm::dvec2(poses[i] * glm::dvec3(body_pts_local[k], 1));
 				length_of_straight += glm::length(next_body_pts[k] - prev_body_pts[k]);
 			}
@@ -664,20 +660,7 @@ namespace kinematics {
 		}
 
 		// create a kinematics
-		kinematics::Kinematics kinematics(0.1);
-
-		// construct a linkage
-		kinematics.diagram.addJoint(boost::shared_ptr<PinJoint>(new PinJoint(0, true, points[0])));
-		kinematics.diagram.addJoint(boost::shared_ptr<PinJoint>(new PinJoint(1, true, points[1])));
-		kinematics.diagram.addJoint(boost::shared_ptr<PinJoint>(new PinJoint(2, false, points[2])));
-		kinematics.diagram.addJoint(boost::shared_ptr<SliderHinge>(new SliderHinge(3, false, points[3])));
-		kinematics.diagram.addLink(true, kinematics.diagram.joints[0], kinematics.diagram.joints[2]);
-		kinematics.diagram.addLink(false, kinematics.diagram.joints[1], kinematics.diagram.joints[3]);
-		kinematics.diagram.addLink(false, kinematics.diagram.joints[2], kinematics.diagram.joints[3]);
-
-		// set the geometry
-		kinematics.diagram.addBody(kinematics.diagram.joints[2], kinematics.diagram.joints[3], body_pts);
-
+		kinematics::Kinematics kinematics = constructKinematics(points, body_pts, {});
 		kinematics.diagram.initialize();
 
 		// initialize the trajectory of the moving body

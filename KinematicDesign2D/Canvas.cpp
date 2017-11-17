@@ -361,12 +361,12 @@ namespace canvas {
 		std::vector<std::vector<glm::dvec2>> linkage_avoidance_pts;
 
 		for (int i = 0; i < design.fixed_bodies.size(); i++) {
-			fixed_body_pts.push_back(kinematics::Object2D(design.fixed_bodies[i]->getPoints()));
+			fixed_body_pts.push_back(kinematics::Object25D(design.fixed_bodies[i]->getPoints()));
 		}
 		for (int i = 0; i < design.moving_bodies.size(); i++) {
 			poses[i].resize(design.moving_bodies[i].poses.size());
 
-			body_pts[i] = kinematics::Object2D(design.moving_bodies[i].poses[0]->getPoints());
+			body_pts[i] = kinematics::Object25D(design.moving_bodies[i].poses[0]->getPoints());
 
 			// set pose matrices
 			for (int j = 0; j < design.moving_bodies[i].poses.size(); j++) {
@@ -402,9 +402,9 @@ namespace canvas {
 		else if (linkage_type == LINKAGE_RRRP) {
 			synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisRRRP());
 		}
-		//else if (linkage_type == LINKAGE_WATT_I) {
+		else if (linkage_type == LINKAGE_WATT_I) {
 			//synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisWattI());
-		//}
+		}
 
 		solutions.resize(body_pts.size());
 		selected_solutions.resize(body_pts.size());

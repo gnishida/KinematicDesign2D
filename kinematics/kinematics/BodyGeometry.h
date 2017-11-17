@@ -15,15 +15,19 @@ namespace kinematics {
 	public:
 		boost::shared_ptr<Joint> pivot1;
 		boost::shared_ptr<Joint> pivot2;
-		Object2D polygons;
+		Object25D polygons;
 		QMap<int, bool> neighbors;
 
 	public:
 		BodyGeometry(boost::shared_ptr<Joint> pivot1, boost::shared_ptr<Joint> pivot2) : pivot1(pivot1), pivot2(pivot2) {}
-		BodyGeometry(boost::shared_ptr<Joint> pivot1, boost::shared_ptr<Joint> pivot2, const Polygon2D& polygon);
-		BodyGeometry(boost::shared_ptr<Joint> pivot1, boost::shared_ptr<Joint> pivot2, const Object2D& polygons);
+		BodyGeometry(boost::shared_ptr<Joint> pivot1, boost::shared_ptr<Joint> pivot2, const Polygon25D& polygon);
+		BodyGeometry(boost::shared_ptr<Joint> pivot1, boost::shared_ptr<Joint> pivot2, const Object25D& polygons);
 
+		glm::dvec2 worldToLocal(const glm::dvec2& pt);
+		glm::dvec2 localToWorld(const glm::dvec2& pt);
 		std::vector<std::vector<glm::dvec2>> getActualPoints();
+		size_t size() const;
+		std::vector<glm::dvec2> getActualPoints(int index);
 		void draw(QPainter& painter, const QPointF& origin, float scale);
 
 		glm::dmat3x2 getLocalToWorldModel();

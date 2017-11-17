@@ -21,7 +21,7 @@ namespace canvas {
 
 	public:
 		static enum { MODE_SELECT = 0, MODE_MOVE, MODE_ROTATION, MODE_RESIZE, MODE_FIXED_RECTANGLE, MODE_FIXED_CIRCLE, MODE_FIXED_POLYGON, MODE_MOVING_RECTANGLE, MODE_MOVING_CIRCLE, MODE_MOVING_POLYGON, MODE_LINKAGE_REGION, MODE_LINKAGE_AVOIDANCE, MODE_KINEMATICS };
-		static enum { LINKAGE_4R = 0, LINKAGE_RRRP };
+		static enum { LINKAGE_4R = 0, LINKAGE_RRRP, LINKAGE_WATT_I };
 
 	public:
 		MainWindow* mainWin;
@@ -42,8 +42,8 @@ namespace canvas {
 		std::vector<kinematics::Solution> selected_solutions; // currently selected solution
 		std::vector<std::vector<kinematics::Solution>> solutions;
 		std::pair<int, int> selectedJoint;
-		std::vector<kinematics::Object2D> fixed_body_pts;
-		std::vector<kinematics::Object2D> body_pts;
+		std::vector<kinematics::Object25D> fixed_body_pts;
+		std::vector<kinematics::Object25D> body_pts;
 		int linkage_type;
 		QTimer* animation_timer;
 		bool collision_check;

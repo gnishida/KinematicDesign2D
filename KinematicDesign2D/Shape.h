@@ -17,7 +17,6 @@ namespace canvas {
 		static enum { RESIZE_TOP_LEFT = 0, RESIZE_TOP_RIGHT, RESIZE_BOTTOM_LEFT, RESIZE_BOTTOM_RIGHT };
 
 	protected:
-		int subtype;
 		bool selected;
 		bool currently_drawing;
 		glm::dvec2 pos;
