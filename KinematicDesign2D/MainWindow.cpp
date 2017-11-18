@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	groupMode->addAction(ui.actionMovingCircle);
 	groupMode->addAction(ui.actionMovingPolygon);
 	groupMode->addAction(ui.actionLinkageRegion);
-	groupMode->addAction(ui.actionLinkageAvoidanceRegion);
+	groupMode->addAction(ui.actionLinkageAvoidance);
 	groupMode->addAction(ui.actionKinematics);
 	ui.actionSelect->setChecked(true);
 	
@@ -46,19 +46,41 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	connect(ui.actionMovingCircle, SIGNAL(triggered()), this, SLOT(onModeChanged()));
 	connect(ui.actionMovingPolygon, SIGNAL(triggered()), this, SLOT(onModeChanged()));
 	connect(ui.actionLinkageRegion, SIGNAL(triggered()), this, SLOT(onModeChanged()));
-	connect(ui.actionLinkageAvoidanceRegion, SIGNAL(triggered()), this, SLOT(onModeChanged()));
+	connect(ui.actionLinkageAvoidance, SIGNAL(triggered()), this, SLOT(onModeChanged()));
 	connect(ui.actionKinematics, SIGNAL(triggered()), this, SLOT(onModeChanged()));
 	connect(ui.actionAddLayer, SIGNAL(triggered()), this, SLOT(onAddLayer()));
 	connect(ui.actionInsertLayer, SIGNAL(triggered()), this, SLOT(onInsertLayer()));
 	connect(ui.actionDeleteLayer, SIGNAL(triggered()), this, SLOT(onDeleteLayer()));
-	connect(ui.actionCalculateSolution4RLinkage, SIGNAL(triggered()), this, SLOT(onCalculateSolution4RLinkage()));
-	connect(ui.actionCalculateSolutionSliderCrank, SIGNAL(triggered()), this, SLOT(onCalculateSolutionSliderCrank()));
+	connect(ui.actionGenerate4RLinkage, SIGNAL(triggered()), this, SLOT(onGenerate4RLinkage()));
+	connect(ui.actionGenerateSliderCrank, SIGNAL(triggered()), this, SLOT(onGenerateSliderCrank()));
 	connect(ui.actionRun, SIGNAL(triggered()), this, SLOT(onRun()));
 	connect(ui.actionRunBackward, SIGNAL(triggered()), this, SLOT(onRunBackward()));
 	connect(ui.actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
 	connect(ui.actionStepForward, SIGNAL(triggered()), this, SLOT(onStepForward()));
 	connect(ui.actionStepBackward, SIGNAL(triggered()), this, SLOT(onStepBackward()));
 	connect(ui.actionCollisionCheck, SIGNAL(triggered()), this, SLOT(onCollisionCheck()));
+
+	// create tool bar for file menu
+	ui.mainToolBar->addAction(ui.actionNew);
+	ui.mainToolBar->addAction(ui.actionOpen);
+	ui.mainToolBar->addAction(ui.actionSave);
+	ui.mainToolBar->addSeparator();
+
+	// create tool bar for modes
+	ui.mainToolBar->addAction(ui.actionSelect);
+	ui.mainToolBar->addAction(ui.actionFixedRectangle);
+	ui.mainToolBar->addAction(ui.actionFixedCircle);
+	ui.mainToolBar->addAction(ui.actionFixedPolygon);
+	ui.mainToolBar->addAction(ui.actionMovingRectangle);
+	ui.mainToolBar->addAction(ui.actionMovingCircle);
+	ui.mainToolBar->addAction(ui.actionMovingPolygon);
+	ui.mainToolBar->addAction(ui.actionLinkageRegion);
+	ui.mainToolBar->addAction(ui.actionLinkageAvoidance);
+	ui.mainToolBar->addSeparator();
+
+	// create tool bar for linkage generation
+	ui.mainToolBar->addAction(ui.actionGenerate4RLinkage);
+	ui.mainToolBar->addAction(ui.actionGenerateSliderCrank);
 }
 
 MainWindow::~MainWindow() {
@@ -156,7 +178,7 @@ void MainWindow::onModeChanged() {
 	else if (ui.actionLinkageRegion->isChecked()) {
 		canvas->setMode(canvas::Canvas::MODE_LINKAGE_REGION);
 	}
-	else if (ui.actionLinkageAvoidanceRegion->isChecked()) {
+	else if (ui.actionLinkageAvoidance->isChecked()) {
 		canvas->setMode(canvas::Canvas::MODE_LINKAGE_AVOIDANCE);
 	}
 	else if (ui.actionKinematics->isChecked()) {
@@ -203,7 +225,7 @@ void MainWindow::onLayerChanged() {
 	}
 }
 
-void MainWindow::onCalculateSolution4RLinkage() {
+void MainWindow::onGenerate4RLinkage() {
 	LinkageSynthesisOptionDialog dlg;
 	if (dlg.exec()) {
 		std::vector<std::pair<double, double>> sigmas = {
@@ -232,7 +254,7 @@ void MainWindow::onCalculateSolution4RLinkage() {
 	}
 }
 
-void MainWindow::onCalculateSolutionSliderCrank() {
+void MainWindow::onGenerateSliderCrank() {
 	LinkageSynthesisOptionDialog dlg;
 	if (dlg.exec()) {
 		std::vector<std::pair<double, double>> sigmas = {

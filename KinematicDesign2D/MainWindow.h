@@ -37,8 +37,8 @@ public slots:
 	void onInsertLayer();
 	void onDeleteLayer();
 	void onLayerChanged();
-	void onCalculateSolution4RLinkage();
-	void onCalculateSolutionSliderCrank();
+	void onGenerate4RLinkage();
+	void onGenerateSliderCrank();
 	void onRun();
 	void onRunBackward();
 	void onStop();

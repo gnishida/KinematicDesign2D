@@ -37,8 +37,8 @@
     <property name="title">
      <string>Kinematics</string>
     </property>
-    <addaction name="actionCalculateSolution4RLinkage"/>
-    <addaction name="actionCalculateSolutionSliderCrank"/>
+    <addaction name="actionGenerate4RLinkage"/>
+    <addaction name="actionGenerateSliderCrank"/>
     <addaction name="separator"/>
     <addaction name="actionRun"/>
     <addaction name="actionRunBackward"/>
@@ -74,7 +74,7 @@
     <addaction name="menuMoving_Body"/>
     <addaction name="separator"/>
     <addaction name="actionLinkageRegion"/>
-    <addaction name="actionLinkageAvoidanceRegion"/>
+    <addaction name="actionLinkageAvoidance"/>
     <addaction name="separator"/>
     <addaction name="actionKinematics"/>
    </widget>
@@ -149,6 +149,10 @@
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/open.png</normaloff>Resources/open.png</iconset>
+   </property>
    <property name="text">
     <string>Open</string>
    </property>
@@ -176,6 +180,10 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/select.png</normaloff>Resources/select.png</iconset>
+   </property>
    <property name="text">
     <string>Select</string>
    </property>
@@ -184,6 +192,10 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/fixed_rectangle.png</normaloff>Resources/fixed_rectangle.png</iconset>
+   </property>
    <property name="text">
     <string>Rectangle</string>
    </property>
@@ -191,6 +203,10 @@
   <action name="actionFixedPolygon">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/fixed_polygon.png</normaloff>Resources/fixed_polygon.png</iconset>
    </property>
    <property name="text">
     <string>Polygon</string>
@@ -213,6 +229,10 @@
    </property>
   </action>
   <action name="actionNew">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/new.png</normaloff>Resources/new.png</iconset>
+   </property>
    <property name="text">
     <string>New</string>
    </property>
@@ -221,6 +241,10 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/save.png</normaloff>Resources/save.png</iconset>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>
@@ -244,9 +268,13 @@
     <string>Layer 3</string>
    </property>
   </action>
-  <action name="actionCalculateSolution4RLinkage">
+  <action name="actionGenerate4RLinkage">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/fourbar_linkage.png</normaloff>Resources/fourbar_linkage.png</iconset>
+   </property>
    <property name="text">
-    <string>Calculate Solution for 4R Linkage</string>
+    <string>Generate 4R Linkage</string>
    </property>
   </action>
   <action name="actionCollisionCheck">
@@ -258,6 +286,10 @@
    </property>
   </action>
   <action name="actionUndo">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/undo.png</normaloff>Resources/undo.png</iconset>
+   </property>
    <property name="text">
     <string>Undo</string>
    </property>
@@ -266,6 +298,10 @@
    </property>
   </action>
   <action name="actionRedo">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/redo.png</normaloff>Resources/redo.png</iconset>
+   </property>
    <property name="text">
     <string>Redo</string>
    </property>
@@ -274,6 +310,10 @@
    </property>
   </action>
   <action name="actionCopy">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/copy.png</normaloff>Resources/copy.png</iconset>
+   </property>
    <property name="text">
     <string>Copy</string>
    </property>
@@ -282,6 +322,10 @@
    </property>
   </action>
   <action name="actionPaste">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/paste.png</normaloff>Resources/paste.png</iconset>
+   </property>
    <property name="text">
     <string>Paste</string>
    </property>
@@ -290,6 +334,10 @@
    </property>
   </action>
   <action name="actionDelete">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/delete.png</normaloff>Resources/delete.png</iconset>
+   </property>
    <property name="text">
     <string>Delete</string>
    </property>
@@ -314,6 +362,10 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/fixed_circle.png</normaloff>Resources/fixed_circle.png</iconset>
+   </property>
    <property name="text">
     <string>Circle</string>
    </property>
@@ -327,16 +379,12 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/linkage_region.png</normaloff>Resources/linkage_region.png</iconset>
+   </property>
    <property name="text">
     <string>Linkage Region</string>
-   </property>
-  </action>
-  <action name="actionLinkageAvoidance">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Linkage Avoidance</string>
    </property>
   </action>
   <action name="actionTest">
@@ -349,9 +397,13 @@
     <string>Circular Repeat</string>
    </property>
   </action>
-  <action name="actionCalculateSolutionSliderCrank">
+  <action name="actionGenerateSliderCrank">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/slider_crank.png</normaloff>Resources/slider_crank.png</iconset>
+   </property>
    <property name="text">
-    <string>Calculate Solutions for Slider Crank</string>
+    <string>Generate Slider Crank</string>
    </property>
   </action>
   <action name="actionAddLayer">
@@ -383,6 +435,10 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/moving_rectangle.png</normaloff>Resources/moving_rectangle.png</iconset>
+   </property>
    <property name="text">
     <string>Rectangle</string>
    </property>
@@ -390,6 +446,10 @@
   <action name="actionMovingCircle">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/moving_circle.png</normaloff>Resources/moving_circle.png</iconset>
    </property>
    <property name="text">
     <string>Circle</string>
@@ -399,11 +459,22 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/moving_polygon.png</normaloff>Resources/moving_polygon.png</iconset>
+   </property>
    <property name="text">
     <string>Polygon</string>
    </property>
   </action>
-  <action name="actionLinkageAvoidanceRegion">
+  <action name="actionLinkageAvoidance">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/linkage_avoidance.png</normaloff>Resources/linkage_avoidance.png</iconset>
+   </property>
    <property name="text">
     <string>Linkage Avoidance Region</string>
    </property>
