@@ -82,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	// create tool bar for linkage generation
 	ui.mainToolBar->addAction(ui.actionGenerate4RLinkage);
 	ui.mainToolBar->addAction(ui.actionGenerateSliderCrank);
+	ui.mainToolBar->addAction(ui.actionGenerateWattI);
 }
 
 MainWindow::~MainWindow() {
