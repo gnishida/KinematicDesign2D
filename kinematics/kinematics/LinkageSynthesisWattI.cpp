@@ -36,8 +36,8 @@ namespace kinematics {
 			// calculate the bounding boxe of the valid regions
 			BBox enlarged_bbox = boundingBox(enlarged_linkage_region_pts);
 
-			for (int iter = 0; iter < num_samples && cnt == 0; iter++) {
-				printf("\rsampling %d/%d", cnt, iter + 1);
+			for (int iter = 0; iter < num_samples && cnt < num_samples; iter++) {
+				printf("\rsampling %d/%d", cnt, (scale - 1) * num_samples + iter + 1);
 
 				// perturbe the poses a little
 				double position_error = 0.0;
@@ -53,6 +53,37 @@ namespace kinematics {
 					}
 				}
 
+				//////////////////////////////////////////////////////////////////////////////
+				// DEBUG
+				/*
+				points.resize(9);
+				points[0] = glm::dvec2(15.3917, 14.8079);
+				points[1] = glm::dvec2(12.9, 14.5801);
+				points[2] = glm::dvec2(25.4013, 14.8364);
+				points[3] = glm::dvec2(24.49, 14.096);
+				points[4] = glm::dvec2(21.2437, 13.1562);
+				points[5] = glm::dvec2(19.8198, 12.9854);
+				points[6] = glm::dvec2(23.9205, 14.4377);
+				points[7] = glm::dvec2(24.8042, 11.4024);
+				points[8] = glm::dvec2(21.3986, 6.80104);
+
+
+				for (int i = 0; i < poses.size(); i++) {
+					glm::dvec2 P5(poses[i] * glm::inverse(poses[0]) * glm::dvec3(points[5], 1));
+					double l1, l2;
+					if (i == 0) {
+						l1 = glm::length(points[2] - points[0]);
+						l2 = glm::length(points[2] - P5);
+					}
+					else {
+						l1 = glm::length(points[6 + i] - points[0]);
+						l2 = glm::length(points[6 + i] - P5);
+					}
+					std::cout << l1 << "," << l2 << std::endl;
+				}
+				*/
+				//////////////////////////////////////////////////////////////////////////////
+				
 				if (!optimizeCandidate(perturbed_poses, enlarged_linkage_region_pts, enlarged_bbox, points)) continue;
 
 				// check hard constraints
@@ -68,49 +99,201 @@ namespace kinematics {
 
 	/**
 	* Optimize the linkage parameters based on the rigidity constraints.
+	* If more than 7 points are provided, the extra ones are for joint 2 at pose 1 ... N.
 	* If it fails to optimize, return false.
 	*/
 	bool LinkageSynthesisWattI::optimizeCandidate(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const BBox& bbox, std::vector<glm::dvec2>& points) {
-		// setup the initial parameters for optimization
-		column_vector starting_point(points.size() * 2);
-		for (int i = 0; i < points.size(); i++) {
-			starting_point(i * 2 + 0, 0) = points[i].x;
-			starting_point(i * 2 + 1, 0) = points[i].y;
+		// optimize joints 0, 2, and 3
+		std::vector<glm::dvec2> pts(poses.size());
+		pts[0] = points[2];
+
+		if (points.size() < 6 + poses.size()) {
+			// guess the position of joint 2 in each pose
+			int sign = crossProduct(points[2] - points[0], points[5] - points[2]) >= 0 ? 1 : -1;
+			double l0 = glm::length(points[2] - points[0]);
+			double l1 = glm::length(points[5] - points[2]);
+			glm::dvec2 p5(glm::inverse(poses[0]) * glm::dvec3(points[5], 1));
+			for (int i = 1; i < poses.size(); i++) {
+				glm::dvec2 P5(poses[i] * glm::dvec3(p5, 1));
+
+				try {
+					if (sign == 1) {
+						pts[i] = circleCircleIntersection(points[0], l0, P5, l1);
+					}
+					else {
+						pts[i] = circleCircleIntersection(P5, l1, points[0], l0);
+					}
+				}
+				catch (char* ex) {
+					pts[i] = glm::mix(points[0], points[5], l0 / (l0 + l1));
+				}
+			}
+
+			points.resize(6 + poses.size());
+		}
+		else {
+			for (int i = 1; i < poses.size(); i++) {
+				pts[i] = points[i + 6];
+			}
 		}
 
-		column_vector lower_bound(points.size() * 2);
-		column_vector upper_bound(points.size() * 2);
-		double min_range = std::numeric_limits<double>::max();
-		for (int i = 0; i < points.size(); i++) {
-			// set the lower bound
-			lower_bound(i * 2 + 0, 0) = bbox.minPt.x;
-			lower_bound(i * 2 + 0, 0) = std::min(lower_bound(i * 2 + 0, 0), starting_point(i * 2 + 0, 0));
+		if (!optimize3RLink(poses, linkage_region_pts, bbox, points[0], points[5], pts)) return false;
+		points[2] = pts[0];
+		for (int i = 1; i < poses.size(); i++) {
+			points[6 + i] = pts[i];
+		}
+		
+		// optimize joints 1 and 3
+		std::vector<glm::dmat3x3> T(poses.size());
+		glm::dvec2 p5(glm::inverse(poses[0]) * glm::dvec3(points[5], 1));
+		for (int i = 0; i < poses.size(); i++) {
+			glm::dvec2 P5(poses[i] * glm::dvec3(p5, 1));
+			T[i] = calculateTransMatrix(pts[i], P5);
+		}
 
-			lower_bound(i * 2 + 1, 0) = bbox.minPt.y;
-			lower_bound(i * 2 + 1, 0) = std::min(lower_bound(i * 2 + 1, 0), starting_point(i * 2 + 1, 0));
+		if (!optimizeLink(T, linkage_region_pts, bbox, points[1], points[3])) return false;
+		
+		// optimize joints 4 and 6
+		std::vector<glm::dmat3x3> S(poses.size());
+		glm::dvec2 p3(glm::inverse(T[0]) * glm::dvec3(points[3], 1));
+		for (int i = 0; i < poses.size(); i++) {
+			glm::dvec2 P3(T[i] * glm::dvec3(p3, 1));
+			S[i] = calculateTransMatrix(points[1], P3);
+		}
+
+		if (!optimizeRRLink(S, poses, linkage_region_pts, bbox, points[4], points[6])) return false;
+		
+		return true;
+	}
+
+	bool LinkageSynthesisWattI::optimize3RLink(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const BBox& bbox, glm::dvec2& A0, glm::dvec2& A2, std::vector<glm::dvec2>& A1) {
+		// setup the initial parameters for optimization
+		column_vector starting_point(A1.size() * 2 + 4);
+		starting_point(0, 0) = A0.x;
+		starting_point(1, 0) = A0.y;
+		starting_point(2, 0) = A2.x;
+		starting_point(3, 0) = A2.y;
+		for (int i = 0; i < A1.size(); i++) {
+			starting_point(4 + i * 2, 0) = A1[i].x;
+			starting_point(5 + i * 2, 0) = A1[i].y;
+		}
+
+		column_vector lower_bound(starting_point.size());
+		column_vector upper_bound(starting_point.size());
+		double min_range = std::numeric_limits<double>::max();
+		for (int i = 0; i < starting_point.size(); i++) {
+			// set the lower bound
+			lower_bound(i, 0) = i % 2 == 0 ? bbox.minPt.x : bbox.minPt.y;
+			lower_bound(i, 0) = std::min(lower_bound(i, 0), starting_point(i, 0));
 
 			// set the upper bound
-			upper_bound(i * 2 + 0, 0) = bbox.maxPt.x;
-			upper_bound(i * 2 + 0, 0) = std::max(upper_bound(i * 2 + 0, 0), starting_point(i * 2 + 0, 0));
+			upper_bound(i, 0) = i % 2 == 0 ? bbox.maxPt.x : bbox.maxPt.y;
+			upper_bound(i, 0) = std::max(upper_bound(i, 0), starting_point(i, 0));
 
-			upper_bound(i * 2 + 1, 0) = bbox.maxPt.y;
-			upper_bound(i * 2 + 1, 0) = std::max(upper_bound(i * 2 + 1, 0), starting_point(i * 2 + 1, 0));
-
-			min_range = std::min(min_range, upper_bound(i * 2 + 0, 0) - lower_bound(i * 2 + 0, 0));
-			min_range = std::min(min_range, upper_bound(i * 2 + 1, 0) - lower_bound(i * 2 + 1, 0));
+			min_range = std::min(min_range, upper_bound(i, 0) - lower_bound(i, 0));
 		}
 
 		try {
-			find_min_bobyqa(SolverForWattI(poses), starting_point, 32, lower_bound, upper_bound, min_range * 0.19, min_range * 0.0001, 1000);
+			int npt = (starting_point.size() + 1) * (starting_point.size() + 2) / 2;
+			find_min_bobyqa(SolverFor3RLink(poses), starting_point, npt, lower_bound, upper_bound, min_range * 0.19, min_range * 0.0001, 1000);
 
-			//check(poses, starting_point);
-
-			for (int i = 0; i < points.size(); i++) {
-				points[0] = glm::dvec2(starting_point(i * 2 + 0, 0), starting_point(i * 2 + 1, 0));
-
-				// if the joints are outside the valid region, discard it.
-				if (!withinPolygon(linkage_region_pts, points[0])) return false;
+			A0.x = starting_point(0, 0);
+			A0.y = starting_point(1, 0);
+			A2.x = starting_point(2, 0);
+			A2.y = starting_point(3, 0);
+			for (int i = 0; i < A1.size(); i++) {
+				A1[i].x = starting_point(4 + i * 2, 0);
+				A1[i].y = starting_point(5 + i * 2, 0);
 			}
+
+			// if the joints are outside the valid region, discard it.
+			if (!withinPolygon(linkage_region_pts, A0)) return false;
+			if (!withinPolygon(linkage_region_pts, A2)) return false;
+			if (!withinPolygon(linkage_region_pts, A1[0])) return false;
+		}
+		catch (std::exception& e) {
+			return false;
+		}
+
+		return true;
+	}
+
+	bool LinkageSynthesisWattI::optimizeLink(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const BBox& bbox, glm::dvec2& A0, glm::dvec2& A1) {
+		// setup the initial parameters for optimization
+		column_vector starting_point(4);
+		starting_point(0, 0) = A0.x;
+		starting_point(1, 0) = A0.y;
+		starting_point(2, 0) = A1.x;
+		starting_point(3, 0) = A1.y;
+
+		column_vector lower_bound(4);
+		column_vector upper_bound(4);
+		double min_range = std::numeric_limits<double>::max();
+		for (int i = 0; i < 4; i++) {
+			// set the lower bound
+			lower_bound(i, 0) = i % 2 == 0 ? bbox.minPt.x : bbox.minPt.y;
+			lower_bound(i, 0) = std::min(lower_bound(i, 0), starting_point(i, 0));
+
+			// set the upper bound
+			upper_bound(i, 0) = i % 2 == 0 ? bbox.maxPt.x : bbox.maxPt.y;
+			upper_bound(i, 0) = std::max(upper_bound(i, 0), starting_point(i, 0));
+
+			min_range = std::min(min_range, upper_bound(i, 0) - lower_bound(i, 0));
+		}
+
+		try {
+			find_min_bobyqa(SolverForLink(poses), starting_point, 14, lower_bound, upper_bound, min_range * 0.19, min_range * 0.0001, 1000);
+
+			A0.x = starting_point(0, 0);
+			A0.y = starting_point(1, 0);
+			A1.x = starting_point(2, 0);
+			A1.y = starting_point(3, 0);
+
+			// if the joints are outside the valid region, discard it.
+			if (!withinPolygon(linkage_region_pts, A0)) return false;
+			if (!withinPolygon(linkage_region_pts, A1)) return false;
+		}
+		catch (std::exception& e) {
+			return false;
+		}
+
+		return true;
+	}
+
+	bool LinkageSynthesisWattI::optimizeRRLink(const std::vector<glm::dmat3x3>& poses0, const std::vector<glm::dmat3x3>& poses1, const std::vector<glm::dvec2>& linkage_region_pts, const BBox& bbox, glm::dvec2& A0, glm::dvec2& A1) {
+		// setup the initial parameters for optimization
+		column_vector starting_point(4);
+		starting_point(0, 0) = A0.x;
+		starting_point(1, 0) = A0.y;
+		starting_point(2, 0) = A1.x;
+		starting_point(3, 0) = A1.y;
+
+		column_vector lower_bound(4);
+		column_vector upper_bound(4);
+		double min_range = std::numeric_limits<double>::max();
+		for (int i = 0; i < 4; i++) {
+			// set the lower bound
+			lower_bound(i, 0) = i % 2 == 0 ? bbox.minPt.x : bbox.minPt.y;
+			lower_bound(i, 0) = std::min(lower_bound(i, 0), starting_point(i, 0));
+
+			// set the upper bound
+			upper_bound(i, 0) = i % 2 == 0 ? bbox.maxPt.x : bbox.maxPt.y;
+			upper_bound(i, 0) = std::max(upper_bound(i, 0), starting_point(i, 0));
+
+			min_range = std::min(min_range, upper_bound(i, 0) - lower_bound(i, 0));
+		}
+
+		try {
+			find_min_bobyqa(SolverForRRLink(poses0, poses1), starting_point, 14, lower_bound, upper_bound, min_range * 0.19, min_range * 0.0001, 1000);
+
+			A0.x = starting_point(0, 0);
+			A0.y = starting_point(1, 0);
+			A1.x = starting_point(2, 0);
+			A1.y = starting_point(3, 0);
+
+			// if the joints are outside the valid region, discard it.
+			if (!withinPolygon(linkage_region_pts, A0)) return false;
+			if (!withinPolygon(linkage_region_pts, A1)) return false;
 		}
 		catch (std::exception& e) {
 			return false;
@@ -177,7 +360,7 @@ namespace kinematics {
 	*/
 	void LinkageSynthesisWattI::updateBodies(Kinematics& kin, const Object25D& moving_body) {
 		kin.diagram.bodies.clear();
-		kin.diagram.addBody(kin.diagram.joints[2], kin.diagram.joints[5], moving_body);
+		kin.diagram.addBody(kin.diagram.joints[5], kin.diagram.joints[6], moving_body);
 	}
 
 	bool LinkageSynthesisWattI::checkHardConstraints(std::vector<glm::dvec2>& points, const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, const std::vector<Object25D>& fixed_bodies, const Object25D& moving_body, bool rotatable_crank, bool avoid_branch_defect, double min_link_length) {
@@ -241,6 +424,7 @@ namespace kinematics {
 	* If the crank is not fully rotatable, true is returned.
 	*/
 	bool LinkageSynthesisWattI::checkRotatableCrankDefect(const std::vector<glm::dvec2>& points) {
+		/*
 		int linkage_type = getType(points);
 		int linkage_type2 = getType({ points[3], points[4], points[5], points[6] });
 
@@ -250,6 +434,11 @@ namespace kinematics {
 		else {
 			return true;
 		}
+		*/
+
+		// HACK:
+		// It seems that sixbar linkage can have any type including "double rocker" that is appropriate.
+		return false;
 	}
 
 	std::pair<double, double> LinkageSynthesisWattI::checkRange(const std::vector<glm::dvec2>& points) {
@@ -385,7 +574,13 @@ namespace kinematics {
 		int orig_sign = crossProduct(points[3] - points[2], points[1] - points[3]) >= 0 ? 1 : -1;
 
 		for (int i = 1; i < poses.size(); i++) {
-			std::vector<glm::dvec2> current_points = calculatePositions(poses, i, points);
+			std::vector<glm::dvec2> current_points;
+			try {
+				current_points = calculatePositions(poses, i, points);
+			}
+			catch (char* ex) {
+				return true;
+			}
 
 			// calculate its sign
 			int sign = crossProduct(current_points[3] - current_points[2], current_points[1] - current_points[3]) >= 0 ? 1 : -1;
@@ -417,7 +612,13 @@ namespace kinematics {
 		orig_sign2 = crossProduct(points[6] - points[5], points[4] - points[6]) >= 0 ? 1 : -1;
 
 		for (int i = 1; i < poses.size(); i++) {
-			std::vector<glm::dvec2> current_points = calculatePositions(poses, i, points);
+			std::vector<glm::dvec2> current_points;
+			try {
+				current_points = calculatePositions(poses, i, points);
+			}
+			catch (char* ex) {
+				return true;
+			}
 
 			int sign, sign2;
 			if (type == 0) {
@@ -444,21 +645,29 @@ namespace kinematics {
 		return false;
 	}
 
+	/**
+	 * Check the collision.
+	 * The points have more than 7 coordinates. The extra ones are for joint 2 at pose 1 ... N, which helps calculating the angle of the driving crank at each pose.
+	 * If collision is detected, return true.
+	 */
 	bool LinkageSynthesisWattI::checkCollision(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const std::vector<Object25D>& fixed_bodies, const Object25D& moving_body, const std::vector<glm::dvec2>& linkage_avoidance_pts) {
 		kinematics::Kinematics kinematics = constructKinematics(points, moving_body, fixed_bodies);
 		kinematics.diagram.initialize();
-
+		
 		// calculate the rotational angle of the driving crank for 1st, 2nd, and last poses
 		// i.e., angles[0] = first pose, angles[1] = second pose, angles[2] = last pose
 		std::vector<double> angles(3);
 		glm::dvec2 w(glm::inverse(poses[0]) * glm::dvec3(points[2], 1));
 		for (int i = 0; i < 2; i++) {
-			glm::dvec2 W = glm::dvec2(poses[i] * glm::dvec3(w, 1));
-			angles[i] = atan2(W.y - points[0].y, W.x - points[0].x);
+			if (i == 0) {
+				angles[i] = atan2(points[2].y - points[0].y, points[2].x - points[0].x);
+			}
+			else {
+				angles[i] = atan2(points[6 + i].y - points[0].y, points[6 + i].x - points[0].x);
+			}
 		}
 		{
-			glm::dvec2 W = glm::dvec2(poses.back() * glm::dvec3(w, 1));
-			angles[2] = atan2(W.y - points[0].y, W.x - points[0].x);
+			angles[2] = atan2(points.back().y - points[0].y, points.back().x - points[0].x);
 		}
 
 		// order the angles based on their signs
@@ -584,7 +793,7 @@ namespace kinematics {
 	}
 
 	double LinkageSynthesisWattI::tortuosityOfTrajectory(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const Object25D& moving_body) {
-		return false;
+		return 0;
 	}
 	
 	std::vector<glm::dvec2> LinkageSynthesisWattI::calculatePositions(const std::vector<glm::dmat3x3>& poses, int pose_id, const std::vector<glm::dvec2>& points) {
@@ -600,109 +809,44 @@ namespace kinematics {
 		lengths[7] = glm::length(points[6] - points[5]);
 		lengths[8] = glm::length(points[6] - points[4]);
 
+
 		glm::dvec2 p5 = glm::dvec2(glm::inverse(poses[0]) * glm::dvec3(points[5], 1));
 		glm::dvec2 p6 = glm::dvec2(glm::inverse(poses[0]) * glm::dvec3(points[6], 1));
-
 		glm::dvec2 P5 = glm::dvec2(poses[pose_id] * glm::dvec3(p5, 1));
 		glm::dvec2 P6 = glm::dvec2(poses[pose_id] * glm::dvec3(p6, 1));
 
 		// case 1
-		try {
-			glm::dvec2 P2 = circleCircleIntersection(points[0], lengths[0], P5, lengths[4]);
-			glm::dvec2 P4 = circleCircleIntersection(points[1], lengths[3], P6, lengths[8]);
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P2, lengths[1], P4, lengths[6]);
-				if (checkPositions(lengths, { points[0], points[1], P2, P3, P4, P5, P6 })) {
-					return{ points[0], points[1], P2, P3, P4, P5, P6 };
-				}
-			}
-			catch (char* ex) {
-			}
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P4, lengths[6], P2, lengths[1]);
-				if (checkPositions(lengths, { points[0], points[1], P2, P3, P4, P5, P6 })) {
-					return{ points[0], points[1], P2, P3, P4, P5, P6 };
-				}
-			}
-			catch (char* ex) {
-			}
-		}
-		catch (char* ex) {
-		}
+		glm::dvec2 P2a = circleCircleIntersection(points[0], lengths[0], P5, lengths[4]);
+		std::vector<glm::dmat3x3> Ta(2);
+		Ta[0] = calculateTransMatrix(points[2], points[5]);
+		Ta[1] = calculateTransMatrix(P2a, P5);
+		glm::dvec2 p3a = glm::dvec2(glm::inverse(Ta[0]) * glm::dvec3(points[3], 1));
+		glm::dvec2 P3a = glm::dvec2(Ta[1] * glm::dvec3(p3a, 1));
+		std::vector<glm::dmat3x3> Sa(2);
+		Sa[0] = calculateTransMatrix(points[1], points[3]);
+		Sa[1] = calculateTransMatrix(points[1], P3a);
+		glm::dvec2 p4a = glm::dvec2(glm::inverse(Sa[0]) * glm::dvec3(points[4], 1));
+		glm::dvec2 P4a = glm::dvec2(Sa[1] * glm::dvec3(p4a, 1));
 
 		// case 2
-		try {
-			glm::dvec2 P2 = circleCircleIntersection(points[0], lengths[0], P5, lengths[4]);
-			glm::dvec2 P4 = circleCircleIntersection(P6, lengths[8], points[1], lengths[3]);
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P2, lengths[1], P4, lengths[6]);
-				if (checkPositions(lengths, { points[0], points[1], P2, P3, P4, P5, P6 })) {
-					return{ points[0], points[1], P2, P3, P4, P5, P6 };
-				}
-			}
-			catch (char* ex) {
-			}
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P4, lengths[6], P2, lengths[1]);
-				if (checkPositions(lengths, { points[0], points[1], P2, P3, P4, P5, P6 })) {
-					return{ points[0], points[1], P2, P3, P4, P5, P6 };
-				}
-			}
-			catch (char* ex) {
-			}
-		}
-		catch (char* ex) {
-		}
+		glm::dvec2 P2b = circleCircleIntersection(P5, lengths[4], points[0], lengths[0]);
+		std::vector<glm::dmat3x3> Tb(2);
+		Tb[0] = calculateTransMatrix(points[2], points[5]);
+		Tb[1] = calculateTransMatrix(P2b, P5);
+		glm::dvec2 p3b = glm::dvec2(glm::inverse(Tb[0]) * glm::dvec3(points[3], 1));
+		glm::dvec2 P3b = glm::dvec2(Tb[1] * glm::dvec3(p3b, 1));
+		std::vector<glm::dmat3x3> Sb(2);
+		Sb[0] = calculateTransMatrix(points[1], points[3]);
+		Sb[1] = calculateTransMatrix(points[1], P3b);
+		glm::dvec2 p4b = glm::dvec2(glm::inverse(Sb[0]) * glm::dvec3(points[4], 1));
+		glm::dvec2 P4b = glm::dvec2(Sb[1] * glm::dvec3(p4b, 1));
 
-		// case 3
-		try {
-			glm::dvec2 P2 = circleCircleIntersection(P5, lengths[4], points[0], lengths[0]);
-			glm::dvec2 P4 = circleCircleIntersection(points[1], lengths[3], P6, lengths[8]);
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P2, lengths[1], P4, lengths[6]);
-				if (checkPositions(lengths, { points[0], points[1], P2, P3, P4, P5, P6 })) {
-					return{ points[0], points[1], P2, P3, P4, P5, P6 };
-				}
-			}
-			catch (char* ex) {
-			}
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P4, lengths[6], P2, lengths[1]);
-				if (checkPositions(lengths, { points[0], points[1], P2, P3, P4, P5, P6 })) {
-					return{ points[0], points[1], P2, P3, P4, P5, P6 };
-				}
-			}
-			catch (char* ex) {
-			}
+		if (std::abs(glm::length(P4a - P6) - lengths[8]) < std::abs(glm::length(P4b - P6) - lengths[8])) {
+			return{ points[0], points[1], P2a, P3a, P4a, P5, P6 };
 		}
-		catch (char* ex) {
+		else {
+			return{ points[0], points[1], P2b, P3b, P4b, P5, P6 };
 		}
-
-		// case 4
-		try {
-			glm::dvec2 P2 = circleCircleIntersection(P5, lengths[4], points[0], lengths[0]);
-			glm::dvec2 P4 = circleCircleIntersection(P6, lengths[8], points[1], lengths[3]);
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P2, lengths[1], P4, lengths[6]);
-				if (checkPositions(lengths, { points[0], points[1], P2, P3, P4, P5, P6 })) {
-					return{ points[0], points[1], P2, P3, P4, P5, P6 };
-				}
-			}
-			catch (char* ex) {
-			}
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P4, lengths[6], P2, lengths[1]);
-				if (checkPositions(lengths, { points[0], points[1], P2, P3, P4, P5, P6 })) {
-					return{ points[0], points[1], P2, P3, P4, P5, P6 };
-				}
-			}
-			catch (char* ex) {
-			}
-		}
-		catch (char* ex) {
-		}
-
-		throw "No valid solution.";
 	}
 
 	bool LinkageSynthesisWattI::checkPositions(const std::vector<double>& lengths, const std::vector<glm::dvec2>& points) {

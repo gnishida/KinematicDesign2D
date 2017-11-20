@@ -414,7 +414,7 @@ namespace canvas {
 			synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisRRRP());
 		}
 		else if (linkage_type == LINKAGE_WATT_I) {
-			//synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisWattI());
+			synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisWattI());
 		}
 
 		solutions.resize(moving_bodies.size());

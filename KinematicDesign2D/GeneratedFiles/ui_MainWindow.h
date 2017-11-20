@@ -67,6 +67,7 @@ public:
     QAction *actionMovingCircle;
     QAction *actionMovingPolygon;
     QAction *actionLinkageAvoidance;
+    QAction *actionGenerateWattI;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -239,6 +240,8 @@ public:
         QIcon icon18;
         icon18.addFile(QStringLiteral("Resources/linkage_avoidance.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionLinkageAvoidance->setIcon(icon18);
+        actionGenerateWattI = new QAction(MainWindowClass);
+        actionGenerateWattI->setObjectName(QStringLiteral("actionGenerateWattI"));
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -279,6 +282,7 @@ public:
         menuFile->addAction(actionExit);
         menuTool->addAction(actionGenerate4RLinkage);
         menuTool->addAction(actionGenerateSliderCrank);
+        menuTool->addAction(actionGenerateWattI);
         menuTool->addSeparator();
         menuTool->addAction(actionRun);
         menuTool->addAction(actionRunBackward);
@@ -377,6 +381,7 @@ public:
         actionMovingCircle->setText(QApplication::translate("MainWindowClass", "Circle", 0));
         actionMovingPolygon->setText(QApplication::translate("MainWindowClass", "Polygon", 0));
         actionLinkageAvoidance->setText(QApplication::translate("MainWindowClass", "Linkage Avoidance Region", 0));
+        actionGenerateWattI->setText(QApplication::translate("MainWindowClass", "Generate Watt I", 0));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "File", 0));
         menuTool->setTitle(QApplication::translate("MainWindowClass", "Kinematics", 0));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "Mode", 0));

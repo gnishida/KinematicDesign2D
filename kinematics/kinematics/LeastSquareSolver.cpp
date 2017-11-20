@@ -5,22 +5,21 @@ namespace kinematics {
 
 	SolverForLink::SolverForLink(const std::vector<glm::dmat3x3>& poses) {
 		this->poses = poses;
+		inv_pose0 = glm::inverse(poses[0]);
 	}
 
 	double SolverForLink::operator() (const column_vector& arg) const {
 		glm::dvec2 A0(arg(0, 0), arg(1, 0));
-		glm::dvec2 a(arg(2, 0), arg(3, 0));
+		glm::dvec2 A1(arg(2, 0), arg(3, 0));
 
-		glm::dvec2 A1(poses[0] * glm::dvec3(a, 1));
-		double l1_squared = glm::length(A1 - A0);
-		l1_squared = l1_squared * l1_squared;
+		glm::dvec2 a(inv_pose0 * glm::dvec3(A1, 1));
+		double l_initial = glm::length2(A1 - A0);
 
 		double ans = 0.0;
 		for (int i = 1; i < poses.size(); i++) {
 			glm::dvec2 A(poses[i] * glm::dvec3(a, 1));
-			double l_squared = glm::length(A - A0);
-			l_squared = l_squared * l_squared;
-			ans += (l_squared - l1_squared) * (l_squared - l1_squared);
+			double l = glm::length2(A - A0);
+			ans += (l_initial - l) * (l_initial - l);
 		}
 
 		return ans;
@@ -28,6 +27,7 @@ namespace kinematics {
 
 	SolverForSlider::SolverForSlider(const std::vector<glm::dmat3x3>& poses) {
 		this->poses = poses;
+		inv_pose0 = glm::inverse(poses[0]);
 	}
 
 	double SolverForSlider::operator() (const column_vector& arg) const {
@@ -51,141 +51,61 @@ namespace kinematics {
 		return ans;
 	}
 
-	SolverForWattI::SolverForWattI(const std::vector<glm::dmat3x3>& poses) {
+	SolverFor3RLink::SolverFor3RLink(const std::vector<glm::dmat3x3>& poses) {
 		this->poses = poses;
 		inv_pose0 = glm::inverse(poses[0]);
 	}
 
-	double SolverForWattI::operator() (const column_vector& arg) const {
-		std::vector<glm::dvec2> points;
-		for (int i = 0; i < arg.size() / 2; i++) {
-			points[i] = glm::dvec2(arg(i * 2, 0), arg(i * 2 + 1, 0));
+	double SolverFor3RLink::operator() (const column_vector& arg) const {
+		glm::dvec2 P0(arg(0, 0), arg(1, 0));
+		glm::dvec2 P2(arg(2, 0), arg(3, 0));
+		std::vector<glm::dvec2> P1(poses.size());
+		for (int i = 0; i < poses.size(); i++) {
+			P1[i].x = arg(4 + i * 2, 0);
+			P1[i].y = arg(5 + i * 2, 0);
 		}
 
-		// length of links
-		std::vector<double> lengths(9);
-		lengths[0] = glm::length(points[2] - points[0]);
-		lengths[1] = glm::length(points[3] - points[2]);
-		lengths[2] = glm::length(points[3] - points[1]);
-		lengths[3] = glm::length(points[4] - points[1]);
-		lengths[4] = glm::length(points[5] - points[2]);
-		lengths[5] = glm::length(points[5] - points[3]);
-		lengths[6] = glm::length(points[4] - points[3]);
-		lengths[7] = glm::length(points[6] - points[5]);
-		lengths[8] = glm::length(points[6] - points[4]);
+		glm::dvec2 p2(inv_pose0 * glm::dvec3(P2, 1));
+		double l0 = glm::length2(P1[0] - P0);
+		double l1 = glm::length2(P1[0] - P2);
 
 		double ans = 0.0;
 		for (int i = 1; i < poses.size(); i++) {
-			double error = calculateMinLengthError(lengths, i, points);
-			ans += error * error;
+			double l0b = glm::length2(P1[i] - P0);
+
+			glm::dvec2 P(poses[i] * glm::dvec3(p2, 1));
+			double l1b = glm::length2(P1[i] - P);
+
+			ans += (l0 - l0b) * (l0 - l0b) + (l1 - l1b) * (l1 - l1b);
 		}
 
 		return ans;
 	}
 
-	double SolverForWattI::calculateMinLengthError(const std::vector<double>& lengths, int pose_id, const std::vector<glm::dvec2>& points) const {
-		glm::dvec2 p5 = glm::dvec2(glm::inverse(poses[0]) * glm::dvec3(points[5], 1));
-		glm::dvec2 p6 = glm::dvec2(glm::inverse(poses[0]) * glm::dvec3(points[6], 1));
-
-		glm::dvec2 P5 = glm::dvec2(poses[pose_id] * glm::dvec3(p5, 1));
-		glm::dvec2 P6 = glm::dvec2(poses[pose_id] * glm::dvec3(p6, 1));
-
-		double min_error = std::numeric_limits<double>::max();
-
-		// case 1
-		try {
-			glm::dvec2 P2 = circleCircleIntersection(points[0], lengths[0], P5, lengths[4]);
-			glm::dvec2 P4 = circleCircleIntersection(points[1], lengths[3], P6, lengths[8]);
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P2, lengths[1], P4, lengths[6]);
-				min_error = std::min(min_error, lengthError(lengths, { points[0], points[1], P2, P3, P4, P5, P6 }));
-			}
-			catch (char* ex) {
-			}
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P4, lengths[6], P2, lengths[1]);
-				min_error = std::min(min_error, lengthError(lengths, { points[0], points[1], P2, P3, P4, P5, P6 }));
-			}
-			catch (char* ex) {
-			}
-		}
-		catch (char* ex) {
-		}
-
-		// case 2
-		try {
-			glm::dvec2 P2 = circleCircleIntersection(points[0], lengths[0], P5, lengths[4]);
-			glm::dvec2 P4 = circleCircleIntersection(P6, lengths[8], points[1], lengths[3]);
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P2, lengths[1], P4, lengths[6]);
-				min_error = std::min(min_error, lengthError(lengths, { points[0], points[1], P2, P3, P4, P5, P6 }));
-			}
-			catch (char* ex) {
-			}
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P4, lengths[6], P2, lengths[1]);
-				min_error = std::min(min_error, lengthError(lengths, { points[0], points[1], P2, P3, P4, P5, P6 }));
-			}
-			catch (char* ex) {
-			}
-		}
-		catch (char* ex) {
-		}
-
-		// case 3
-		try {
-			glm::dvec2 P2 = circleCircleIntersection(P5, lengths[4], points[0], lengths[0]);
-			glm::dvec2 P4 = circleCircleIntersection(points[1], lengths[3], P6, lengths[8]);
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P2, lengths[1], P4, lengths[6]);
-				min_error = std::min(min_error, lengthError(lengths, { points[0], points[1], P2, P3, P4, P5, P6 }));
-			}
-			catch (char* ex) {
-			}
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P4, lengths[6], P2, lengths[1]);
-				min_error = std::min(min_error, lengthError(lengths, { points[0], points[1], P2, P3, P4, P5, P6 }));
-			}
-			catch (char* ex) {
-			}
-		}
-		catch (char* ex) {
-		}
-
-		// case 4
-		try {
-			glm::dvec2 P2 = circleCircleIntersection(P5, lengths[4], points[0], lengths[0]);
-			glm::dvec2 P4 = circleCircleIntersection(P6, lengths[8], points[1], lengths[3]);
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P2, lengths[1], P4, lengths[6]);
-				min_error = std::min(min_error, lengthError(lengths, { points[0], points[1], P2, P3, P4, P5, P6 }));
-			}
-			catch (char* ex) {
-			}
-			try {
-				glm::dvec2 P3 = circleCircleIntersection(P4, lengths[6], P2, lengths[1]);
-				min_error = std::min(min_error, lengthError(lengths, { points[0], points[1], P2, P3, P4, P5, P6 }));
-			}
-			catch (char* ex) {
-			}
-		}
-		catch (char* ex) {
-		}
-
-		return min_error;
+	SolverForRRLink::SolverForRRLink(const std::vector<glm::dmat3x3>& poses0, const std::vector<glm::dmat3x3>& poses1) {
+		this->poses0 = poses0;
+		this->poses1 = poses1;
+		inv_pose0 = glm::inverse(poses0[0]);
+		inv_pose1 = glm::inverse(poses1[0]);
 	}
 
-	double SolverForWattI::lengthError(const std::vector<double> lengths, const std::vector<glm::dvec2>& points) const {
+	double SolverForRRLink::operator() (const column_vector& arg) const {
+		glm::dvec2 A0(arg(0, 0), arg(1, 0));
+		glm::dvec2 A1(arg(2, 0), arg(3, 0));
+
+		glm::dvec2 a0(inv_pose0 * glm::dvec3(A0, 1));
+		glm::dvec2 a1(inv_pose1 * glm::dvec3(A1, 1));
+
+		double l_initial = glm::length2(A1 - A0);
+
 		double ans = 0.0;
-		ans += glm::length2(points[2] - points[0]) - lengths[0];
-		ans += glm::length2(points[3] - points[2]) - lengths[1];
-		ans += glm::length2(points[1] - points[3]) - lengths[2];
-		ans += glm::length2(points[4] - points[1]) - lengths[3];
-		ans += glm::length2(points[5] - points[2]) - lengths[4];
-		ans += glm::length2(points[5] - points[3]) - lengths[5];
-		ans += glm::length2(points[4] - points[3]) - lengths[6];
-		ans += glm::length2(points[6] - points[5]) - lengths[7];
-		ans += glm::length2(points[6] - points[4]) - lengths[8];
+		for (int i = 1; i < poses1.size(); i++) {
+			glm::dvec2 A0b(poses0[i] * glm::dvec3(a0, 1));
+			glm::dvec2 A1b(poses1[i] * glm::dvec3(a1, 1));
+			double l = glm::length2(A1b - A0b);
+			ans += (l_initial - l) * (l_initial - l);
+		}
+
 		return ans;
 	}
 

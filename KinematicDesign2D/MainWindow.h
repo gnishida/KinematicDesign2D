@@ -39,6 +39,7 @@ public slots:
 	void onLayerChanged();
 	void onGenerate4RLinkage();
 	void onGenerateSliderCrank();
+	void onGenerateWattI();
 	void onRun();
 	void onRunBackward();
 	void onStop();
