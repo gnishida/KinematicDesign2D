@@ -42,8 +42,8 @@ namespace canvas {
 		std::vector<kinematics::Solution> selected_solutions; // currently selected solution
 		std::vector<std::vector<kinematics::Solution>> solutions;
 		std::pair<int, int> selectedJoint;
-		std::vector<kinematics::Object25D> fixed_body_pts;
-		std::vector<kinematics::Object25D> body_pts;
+		std::vector<kinematics::Object25D> fixed_bodies;
+		std::vector<kinematics::Object25D> moving_bodies;
 		int linkage_type;
 		QTimer* animation_timer;
 		bool collision_check;

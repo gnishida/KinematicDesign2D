@@ -354,19 +354,19 @@ namespace canvas {
 		this->linkage_type = linkage_type;
 
 		// get the geometry of fixed rigid bodies, moving bodies, linkage regions
-		fixed_body_pts.clear();
-		body_pts.resize(design.moving_bodies.size());
+		fixed_bodies.clear();
+		moving_bodies.resize(design.moving_bodies.size());
 		std::vector<std::vector<glm::dmat3x3>> poses(design.moving_bodies.size());
 		std::vector<std::vector<glm::dvec2>> linkage_region_pts;
 		std::vector<std::vector<glm::dvec2>> linkage_avoidance_pts;
 
 		for (int i = 0; i < design.fixed_bodies.size(); i++) {
-			fixed_body_pts.push_back(kinematics::Object25D(design.fixed_bodies[i]->getPoints()));
+			fixed_bodies.push_back(kinematics::Object25D(design.fixed_bodies[i]->getPoints()));
 		}
 		for (int i = 0; i < design.moving_bodies.size(); i++) {
 			poses[i].resize(design.moving_bodies[i].poses.size());
 
-			body_pts[i] = kinematics::Object25D(design.moving_bodies[i].poses[0]->getPoints());
+			moving_bodies[i] = kinematics::Object25D(design.moving_bodies[i].poses[0]->getPoints());
 
 			// set pose matrices
 			for (int j = 0; j < design.moving_bodies[i].poses.size(); j++) {
@@ -394,6 +394,17 @@ namespace canvas {
 			}
 		}
 		
+		// merged fixed body
+		std::vector<std::vector<glm::dvec2>> polygons(design.fixed_bodies.size());
+		for (int i = 0; i < design.fixed_bodies.size(); i++) {
+			polygons[i] = design.fixed_bodies[i]->getPoints();
+		}
+		polygons = kinematics::unionPolygon(polygons);
+		std::vector<kinematics::Object25D> merged_fixed_bodies;
+		for (int i = 0; i < polygons.size(); i++) {
+			merged_fixed_bodies.push_back(kinematics::Object25D(polygons[i]));
+		}
+
 		kinematics.clear();
 
 		if (linkage_type == LINKAGE_4R) {
@@ -406,9 +417,9 @@ namespace canvas {
 			//synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisWattI());
 		}
 
-		solutions.resize(body_pts.size());
-		selected_solutions.resize(body_pts.size());
-		for (int i = 0; i < body_pts.size(); i++) {
+		solutions.resize(moving_bodies.size());
+		selected_solutions.resize(moving_bodies.size());
+		for (int i = 0; i < moving_bodies.size(); i++) {
 			time_t start = clock();
 
 			// calculate a distance mapt for the linkage region
@@ -418,7 +429,7 @@ namespace canvas {
 			
 			// calculate the circle point curve and center point curve
 			std::vector<glm::dvec2> enlarged_linkage_region_pts;
-			synthesis->calculateSolution(poses[i], linkage_region_pts[i], linkage_avoidance_pts[i], num_samples, fixed_body_pts, body_pts[i], sigmas, rotatable_crank, avoid_branch_defect, 1.0, solutions[i], enlarged_linkage_region_pts);
+			synthesis->calculateSolution(poses[i], linkage_region_pts[i], linkage_avoidance_pts[i], num_samples, merged_fixed_bodies, moving_bodies[i], sigmas, rotatable_crank, avoid_branch_defect, 1.0, solutions[i], enlarged_linkage_region_pts);
 
 			if (solutions[i].size() == 0) {
 				mainWin->ui.statusBar->showMessage("No candidate was found.");
@@ -435,8 +446,8 @@ namespace canvas {
 
 			start = clock();
 
-			selected_solutions[i] = synthesis->findBestSolution(poses[i], solutions[i], enlarged_linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts[i], fixed_body_pts, body_pts[i], rotatable_crank, avoid_branch_defect, 1.0, weights, num_particles, num_iterations, record_file);
-			kinematics::Kinematics kin = synthesis->constructKinematics(selected_solutions[i].points, body_pts[i], fixed_body_pts);
+			selected_solutions[i] = synthesis->findBestSolution(poses[i], solutions[i], enlarged_linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts[i], merged_fixed_bodies, moving_bodies[i], rotatable_crank, avoid_branch_defect, 1.0, weights, num_particles, num_iterations, record_file);
+			kinematics::Kinematics kin = synthesis->constructKinematics(selected_solutions[i].points, moving_bodies[i], fixed_bodies);
 
 			kinematics.push_back(kin);
 
@@ -778,14 +789,12 @@ namespace canvas {
 					}
 
 					// update the geometry
-					for (int i = 0; i < body_pts.size(); i++) {
-						synthesis->updateBodies(kinematics[i], body_pts[i]);
-						//kinematics[i].diagram.bodies.clear();
-						//kinematics[i].diagram.addBody(kinematics[i].diagram.joints[2], kinematics[i].diagram.joints[3], body_pts[i]);
+					for (int i = 0; i < moving_bodies.size(); i++) {
+						synthesis->updateBodies(kinematics[i], moving_bodies[i]);
 					}
-					for (int i = 0; i < fixed_body_pts.size(); i++) {
+					for (int i = 0; i < fixed_bodies.size(); i++) {
 						for (int j = 0; j < kinematics.size(); j++) {
-							kinematics[j].diagram.addBody(kinematics[j].diagram.joints[0], kinematics[j].diagram.joints[1], fixed_body_pts[i]);
+							kinematics[j].diagram.addBody(kinematics[j].diagram.joints[0], kinematics[j].diagram.joints[1], fixed_bodies[i]);
 						}
 					}
 
