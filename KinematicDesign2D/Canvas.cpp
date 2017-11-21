@@ -34,12 +34,10 @@ namespace canvas {
 
 		animation_timer = NULL;
 		collision_check = true;
+		show_solutions = false;
 
 		selectedJoint = std::make_pair(-1, -1);
 		linkage_type = LINKAGE_4R;
-		orderDefect = false;
-		branchDefect = false;
-		circuitDefect = false;
 	}
 
 	Canvas::~Canvas() {
@@ -488,24 +486,6 @@ namespace canvas {
 		return ans;
 	}
 
-	/*
-	void Canvas::onDebug() {
-		if (kinematics.size() >= 0) {
-			boost::shared_ptr<kinematics::LinkageSynthesis> synthesis;
-			if (linkage_type == LINKAGE_4R) {
-				synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesis4R());
-			}
-			else if (linkage_type == LINKAGE_RRRP) {
-				synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisRRRP());
-			}
-
-			synthesis->checkOrderDefect(poses[0], kinematics[0].diagram.joints[0]->pos, kinematics[0].diagram.joints[1]->pos, kinematics[0].diagram.joints[2]->pos, kinematics[0].diagram.joints[3]->pos, true);
-			synthesis->checkBranchDefect(poses[0], kinematics[0].diagram.joints[0]->pos, kinematics[0].diagram.joints[1]->pos, kinematics[0].diagram.joints[2]->pos, kinematics[0].diagram.joints[3]->pos, true);
-			synthesis->checkCircuitDefect(poses[0], kinematics[0].diagram.joints[0]->pos, kinematics[0].diagram.joints[1]->pos, kinematics[0].diagram.joints[2]->pos, kinematics[0].diagram.joints[3]->pos, true);
-		}
-	}
-	*/
-
 	void Canvas::animation_update() {
 		for (int i = 0; i < kinematics.size(); i++) {
 			try {
@@ -575,7 +555,7 @@ namespace canvas {
 		}
 		else {
 			// draw solutions
-			if (selectedJoint.first >= 0) {
+			if (show_solutions && selectedJoint.first >= 0) {
 				int linkage_id = selectedJoint.first;
 				painter.setPen(QPen(QColor(255, 128, 128, 64), 1));
 				painter.setBrush(QBrush(QColor(255, 128, 128, 64)));
@@ -694,7 +674,7 @@ namespace canvas {
 				double min_dist = 6;
 				for (int i = 0; i < kinematics.size(); i++) {
 					for (int j = 0; j < kinematics[i].diagram.joints.size(); j++) {
-						if (!ctrlPressed && j >= 2) continue;
+						if (ctrlPressed && j >= 2) continue;
 						double dist = glm::length(kinematics[i].diagram.joints[j]->pos - pt);
 						if (dist < min_dist) {
 							min_dist = dist;
@@ -759,7 +739,7 @@ namespace canvas {
 					int joint_id = selectedJoint.second;
 					glm::dvec2 pt = screenToWorldCoordinates(e->x(), e->y());
 
-					if (ctrlPressed) {
+					if (!ctrlPressed) {
 						// move the selected joint
 						kinematics[linkage_id].diagram.joints[joint_id]->pos = pt;
 					}

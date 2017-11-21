@@ -68,6 +68,8 @@ public:
     QAction *actionMovingPolygon;
     QAction *actionLinkageAvoidance;
     QAction *actionGenerateWattI;
+    QAction *actionMirror;
+    QAction *actionShowSolutions;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -77,6 +79,7 @@ public:
     QMenu *menuMoving_Body;
     QMenu *menuLayer;
     QMenu *menuEdit;
+    QMenu *menuView;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -245,6 +248,10 @@ public:
         QIcon icon19;
         icon19.addFile(QStringLiteral("Resources/watt_i_linkage.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionGenerateWattI->setIcon(icon19);
+        actionMirror = new QAction(MainWindowClass);
+        actionMirror->setObjectName(QStringLiteral("actionMirror"));
+        actionShowSolutions = new QAction(MainWindowClass);
+        actionShowSolutions->setObjectName(QStringLiteral("actionShowSolutions"));
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -265,6 +272,8 @@ public:
         menuLayer->setObjectName(QStringLiteral("menuLayer"));
         menuEdit = new QMenu(menuBar);
         menuEdit->setObjectName(QStringLiteral("menuEdit"));
+        menuView = new QMenu(menuBar);
+        menuView->setObjectName(QStringLiteral("menuView"));
         MainWindowClass->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindowClass);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -278,6 +287,7 @@ public:
         menuBar->addAction(menuMode->menuAction());
         menuBar->addAction(menuLayer->menuAction());
         menuBar->addAction(menuTool->menuAction());
+        menuBar->addAction(menuView->menuAction());
         menuFile->addAction(actionNew);
         menuFile->addAction(actionOpen);
         menuFile->addAction(actionSave);
@@ -323,6 +333,7 @@ public:
         menuEdit->addAction(actionSelectAll);
         menuEdit->addSeparator();
         menuEdit->addAction(actionCircularRepeat);
+        menuView->addAction(actionShowSolutions);
 
         retranslateUi(MainWindowClass);
 
@@ -385,6 +396,8 @@ public:
         actionMovingPolygon->setText(QApplication::translate("MainWindowClass", "Polygon", 0));
         actionLinkageAvoidance->setText(QApplication::translate("MainWindowClass", "Linkage Avoidance Region", 0));
         actionGenerateWattI->setText(QApplication::translate("MainWindowClass", "Generate Watt I", 0));
+        actionMirror->setText(QApplication::translate("MainWindowClass", "Mirror", 0));
+        actionShowSolutions->setText(QApplication::translate("MainWindowClass", "Show Solutions", 0));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "File", 0));
         menuTool->setTitle(QApplication::translate("MainWindowClass", "Kinematics", 0));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "Mode", 0));
@@ -392,6 +405,7 @@ public:
         menuMoving_Body->setTitle(QApplication::translate("MainWindowClass", "Moving Body", 0));
         menuLayer->setTitle(QApplication::translate("MainWindowClass", "Layer", 0));
         menuEdit->setTitle(QApplication::translate("MainWindowClass", "Edit", 0));
+        menuView->setTitle(QApplication::translate("MainWindowClass", "View", 0));
     } // retranslateUi
 
 };

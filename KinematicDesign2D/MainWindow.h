@@ -21,6 +21,10 @@ public:
 
 	void initLayerMenu(int num_layers);
 
+protected:
+	void keyPressEvent(QKeyEvent* e);
+	void keyReleaseEvent(QKeyEvent* e);
+
 public slots:
 	void onNew();
 	void onOpen();
@@ -46,8 +50,7 @@ public slots:
 	void onStepForward();
 	void onStepBackward();
 	void onCollisionCheck();
-	void keyPressEvent(QKeyEvent* e);
-	void keyReleaseEvent(QKeyEvent* e);
+	void onShowSolutions();
 };
 
 #endif // MAINWINDOW_H

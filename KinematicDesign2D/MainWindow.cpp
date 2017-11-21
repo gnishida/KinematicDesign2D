@@ -60,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	connect(ui.actionStepForward, SIGNAL(triggered()), this, SLOT(onStepForward()));
 	connect(ui.actionStepBackward, SIGNAL(triggered()), this, SLOT(onStepBackward()));
 	connect(ui.actionCollisionCheck, SIGNAL(triggered()), this, SLOT(onCollisionCheck()));
+	connect(ui.actionShowSolutions, SIGNAL(triggered()), this, SLOT(onShowSolutions()));
 
 	// create tool bar for file menu
 	ui.mainToolBar->addAction(ui.actionNew);
@@ -104,6 +105,14 @@ void MainWindow::initLayerMenu(int num_layers) {
 		connect(menuLayers[i], SIGNAL(triggered()), this, SLOT(onLayerChanged()));
 	}
 	menuLayers[0]->setChecked(true);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* e) {
+	canvas->keyPressEvent(e);
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent* e) {
+	canvas->keyReleaseEvent(e);
 }
 
 void MainWindow::onNew() {
@@ -339,11 +348,8 @@ void MainWindow::onCollisionCheck() {
 	canvas->collision_check = ui.actionCollisionCheck->isChecked();
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* e) {
-	canvas->keyPressEvent(e);
-}
-
-void MainWindow::keyReleaseEvent(QKeyEvent* e) {
-	canvas->keyReleaseEvent(e);
+void MainWindow::onShowSolutions() {
+	canvas->show_solutions = ui.actionShowSolutions->isChecked();
+	update();
 }
 

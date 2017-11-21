@@ -47,12 +47,10 @@ namespace canvas {
 		int linkage_type;
 		QTimer* animation_timer;
 		bool collision_check;
+		bool show_solutions;
 		QPointF prev_mouse_pt;
 		QPointF origin;
 		double scale;
-		bool orderDefect;
-		bool branchDefect;
-		bool circuitDefect;
 
 	public:
 		Canvas(MainWindow* mainWin);
