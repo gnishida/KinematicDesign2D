@@ -185,6 +185,8 @@ namespace kinematics {
 
 		if (record_file) {
 			file->close();
+			delete out;
+			delete file;
 		}
 
 		// sort the particles based on the costs
