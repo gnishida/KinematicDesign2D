@@ -252,6 +252,7 @@ public:
         actionMirror->setObjectName(QStringLiteral("actionMirror"));
         actionShowSolutions = new QAction(MainWindowClass);
         actionShowSolutions->setObjectName(QStringLiteral("actionShowSolutions"));
+        actionShowSolutions->setCheckable(true);
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);

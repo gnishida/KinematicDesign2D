@@ -502,6 +502,9 @@
    </property>
   </action>
   <action name="actionShowSolutions">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show Solutions</string>
    </property>
