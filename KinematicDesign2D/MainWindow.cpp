@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	connect(ui.actionStepBackward, SIGNAL(triggered()), this, SLOT(onStepBackward()));
 	connect(ui.actionCollisionCheck, SIGNAL(triggered()), this, SLOT(onCollisionCheck()));
 	connect(ui.actionShowSolutions, SIGNAL(triggered()), this, SLOT(onShowSolutions()));
+	connect(ui.actionShowGridLines, SIGNAL(triggered()), this, SLOT(onShowGridLines()));
 
 	// create tool bar for file menu
 	ui.mainToolBar->addAction(ui.actionNew);
@@ -350,6 +351,11 @@ void MainWindow::onCollisionCheck() {
 
 void MainWindow::onShowSolutions() {
 	canvas->show_solutions = ui.actionShowSolutions->isChecked();
+	update();
+}
+
+void MainWindow::onShowGridLines() {
+	canvas->show_grid_lines = ui.actionShowGridLines->isChecked();
 	update();
 }
 

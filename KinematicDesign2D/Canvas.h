@@ -48,6 +48,7 @@ namespace canvas {
 		QTimer* animation_timer;
 		bool collision_check;
 		bool show_solutions;
+		bool show_grid_lines;
 		QPointF prev_mouse_pt;
 		QPointF origin;
 		double scale;

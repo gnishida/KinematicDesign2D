@@ -35,6 +35,7 @@ namespace canvas {
 		animation_timer = NULL;
 		collision_check = true;
 		show_solutions = false;
+		show_grid_lines = true;
 
 		selectedJoint = std::make_pair(-1, -1);
 		linkage_type = LINKAGE_4R;
@@ -508,13 +509,15 @@ namespace canvas {
 		painter.fillRect(0, 0, width(), height(), QColor(255, 255, 255));
 
 		// draw grid
-		painter.save();
-		painter.setPen(QPen(QColor(224, 224, 224), 1));
-		for (int i = -2000; i <= 2000; i++) {
-			painter.drawLine(origin.x() + i * 5 * scale, -10000 * scale + origin.y(), origin.x() + i * 5 * scale, 10000 * scale + origin.y());
-			painter.drawLine(-10000 * scale + origin.x(), origin.y() + i * 5 * scale, 10000 * scale + origin.x(), origin.y() + i * 5 * scale);
+		if (show_grid_lines) {
+			painter.save();
+			painter.setPen(QPen(QColor(224, 224, 224), 1));
+			for (int i = -2000; i <= 2000; i++) {
+				painter.drawLine(origin.x() + i * 5 * scale, -10000 * scale + origin.y(), origin.x() + i * 5 * scale, 10000 * scale + origin.y());
+				painter.drawLine(-10000 * scale + origin.x(), origin.y() + i * 5 * scale, 10000 * scale + origin.x(), origin.y() + i * 5 * scale);
+			}
+			painter.restore();
 		}
-		painter.restore();
 
 		if (mode != MODE_KINEMATICS) {
 			// render unselected layers as background
@@ -590,11 +593,13 @@ namespace canvas {
 		}
 
 		// draw axes
-		painter.save();
-		painter.setPen(QPen(QColor(128, 128, 128), 1));
-		painter.drawLine(-10000 * scale + origin.x(), origin.y(), 10000 * scale + origin.x(), origin.y());
-		painter.drawLine(origin.x(), -10000 * scale + origin.y(), origin.x(), 10000 * scale + origin.y());
-		painter.restore();
+		if (show_grid_lines) {
+			painter.save();
+			painter.setPen(QPen(QColor(128, 128, 128), 1));
+			painter.drawLine(-10000 * scale + origin.x(), origin.y(), 10000 * scale + origin.x(), origin.y());
+			painter.drawLine(origin.x(), -10000 * scale + origin.y(), origin.x(), 10000 * scale + origin.y());
+			painter.restore();
+		}
 	}
 
 	void Canvas::mousePressEvent(QMouseEvent* e) {

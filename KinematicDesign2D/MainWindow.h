@@ -51,6 +51,7 @@ public slots:
 	void onStepBackward();
 	void onCollisionCheck();
 	void onShowSolutions();
+	void onShowGridLines();
 };
 
 #endif // MAINWINDOW_H

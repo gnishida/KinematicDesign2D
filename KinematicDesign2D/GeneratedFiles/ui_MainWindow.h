@@ -70,6 +70,7 @@ public:
     QAction *actionGenerateWattI;
     QAction *actionMirror;
     QAction *actionShowSolutions;
+    QAction *actionShowGridLines;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -253,6 +254,10 @@ public:
         actionShowSolutions = new QAction(MainWindowClass);
         actionShowSolutions->setObjectName(QStringLiteral("actionShowSolutions"));
         actionShowSolutions->setCheckable(true);
+        actionShowGridLines = new QAction(MainWindowClass);
+        actionShowGridLines->setObjectName(QStringLiteral("actionShowGridLines"));
+        actionShowGridLines->setCheckable(true);
+        actionShowGridLines->setChecked(true);
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -335,6 +340,7 @@ public:
         menuEdit->addSeparator();
         menuEdit->addAction(actionCircularRepeat);
         menuView->addAction(actionShowSolutions);
+        menuView->addAction(actionShowGridLines);
 
         retranslateUi(MainWindowClass);
 
@@ -399,6 +405,7 @@ public:
         actionGenerateWattI->setText(QApplication::translate("MainWindowClass", "Generate Watt I", 0));
         actionMirror->setText(QApplication::translate("MainWindowClass", "Mirror", 0));
         actionShowSolutions->setText(QApplication::translate("MainWindowClass", "Show Solutions", 0));
+        actionShowGridLines->setText(QApplication::translate("MainWindowClass", "Show Grid Lines", 0));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "File", 0));
         menuTool->setTitle(QApplication::translate("MainWindowClass", "Kinematics", 0));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "Mode", 0));
