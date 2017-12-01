@@ -81,7 +81,6 @@ namespace canvas {
 		void invertSpeed();
 		void stepForward();
 		void stepBackward();
-		void showAssemblies(bool flag);
 		void showLinks(bool flag);
 		void showBodies(bool flag);
 		glm::dvec2 screenToWorldCoordinates(const glm::dvec2& p);
@@ -89,6 +88,7 @@ namespace canvas {
 		glm::dvec2 worldToScreenCoordinates(const glm::dvec2& p);
 
 		void calculateSolutions(int linkage_type, int num_samples, std::vector<std::pair<double, double>>& sigmas, bool avoid_branch_defect, bool rotatable_crank, const std::vector<double>& weights, int num_particles, int num_iterations, bool record_file);
+		void constructKinematics();
 		int findSolution(const std::vector<kinematics::Solution>& solutions, const glm::dvec2& pt, int joint_id);
 
 	public slots:

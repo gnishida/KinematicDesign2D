@@ -10,6 +10,47 @@
 
 namespace kinematics {
 
+	class Options {
+	public:
+		static Options* instance;
+		float body_margin;
+		float gap;
+		float link_width;
+		float link_depth;
+		float hole_radius;
+		float joint_radius;
+		float joint_cap_radius1;
+		float joint_cap_radius2;
+		float joint_cap_depth;
+		float slider_guide_width;
+		float slider_guide_depth;
+		float body_depth;
+
+	protected:
+		Options() {
+			body_margin = 0.3f;
+			gap = 0.04f;
+			link_width = 1.0f;
+			link_depth = 0.3f;
+			hole_radius = 0.26f;
+			joint_radius = 0.25f;
+			joint_cap_radius1 = 0.23f;
+			joint_cap_radius2 = 0.28f;
+			joint_cap_depth = 0.15f;
+			slider_guide_width = 1.0f;
+			slider_guide_depth = 0.3f;
+			body_depth = 10.0f;
+		}
+
+	public:
+		static Options* getInstance() {
+			if (!instance) instance = new Options();
+			return instance;
+		}
+	};
+
+	static Options* options = Options::getInstance();
+
 	class KinematicDiagram {
 	public:
 		QMap<int, boost::shared_ptr<Joint>> joints;
@@ -32,6 +73,10 @@ namespace kinematics {
 		boost::shared_ptr<Link> addLink(std::vector<boost::shared_ptr<Joint>> joints);
 		boost::shared_ptr<Link> addLink(bool driver, std::vector<boost::shared_ptr<Joint>> joints);
 		void addBody(boost::shared_ptr<Joint> joint1, boost::shared_ptr<Joint> joint2, const Object25D& points);
+		void addPolygonToBody(int body_id, const Polygon25D& polygon);
+		void connectJointsToBodies(std::vector<Object25D>& fixed_bodies, std::vector<glm::dvec2>& connected_pts);
+		glm::dvec2 connectFixedJointToBody(boost::shared_ptr<kinematics::Joint> joint, std::vector<Object25D>& fixed_bodies);
+		glm::dvec2 connectMovingJointToBody(boost::shared_ptr<Joint> joint, int body_id, const std::vector<glm::dvec2>& moving_body);
 		void load(const QString& filename);
 		void save(const QString& filename);
 		void updateBodyAdjacency();

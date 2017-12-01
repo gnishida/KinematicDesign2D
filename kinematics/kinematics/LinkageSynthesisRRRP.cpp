@@ -233,7 +233,7 @@ namespace kinematics {
 	/**
 	* Construct a linkage.
 	*/
-	Kinematics LinkageSynthesisRRRP::constructKinematics(const std::vector<glm::dvec2>& points, const Object25D& moving_body, const std::vector<Object25D>& fixed_bodies) {
+	Kinematics LinkageSynthesisRRRP::constructKinematics(const std::vector<glm::dvec2>& points, const Object25D& moving_body, bool connect_joints, const std::vector<Object25D>& fixed_bodies, std::vector<glm::dvec2>& connected_pts) {
 		kinematics::Kinematics kin;
 		kin.diagram.addJoint(boost::shared_ptr<kinematics::PinJoint>(new kinematics::PinJoint(0, true, points[0])));
 		kin.diagram.addJoint(boost::shared_ptr<kinematics::PinJoint>(new kinematics::PinJoint(1, true, points[1])));
@@ -248,6 +248,10 @@ namespace kinematics {
 
 		// update the geometry
 		updateBodies(kin, moving_body);
+
+		if (connect_joints) {
+			kin.diagram.connectJointsToBodies(copied_fixed_bodies, connected_pts);
+		}
 
 		// add the fixed rigid bodies
 		for (int i = 0; i < copied_fixed_bodies.size(); i++) {
@@ -279,7 +283,7 @@ namespace kinematics {
 		// collision check
 		// moving_body[0] means the main body without the joint connectors
 		glm::dvec2 slider_end_pos1, slider_end_pos2;
-		if (checkCollision(poses, points, fixed_bodies, moving_body[0], linkage_avoidance_pts, slider_end_pos1, slider_end_pos2)) return false;
+		if (checkCollision(poses, points, fixed_bodies, moving_body[0], linkage_avoidance_pts, slider_end_pos1, slider_end_pos2, 2)) return false;
 
 		// locate the two endpoints of the bar
 		points[1] = slider_end_pos1 - slider_dir * 2.0;
@@ -439,8 +443,9 @@ namespace kinematics {
 		return false;
 	}
 
-	bool LinkageSynthesisRRRP::checkCollision(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const std::vector<Object25D>& fixed_bodies, const Object25D& moving_body, const std::vector<glm::dvec2>& linkage_avoidance_pts, glm::dvec2& slider_end_pos1, glm::dvec2& slider_end_pos2) {
-		kinematics::Kinematics kinematics = constructKinematics(points, moving_body, fixed_bodies);
+	bool LinkageSynthesisRRRP::checkCollision(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const std::vector<Object25D>& fixed_bodies, const Object25D& moving_body, const std::vector<glm::dvec2>& linkage_avoidance_pts, glm::dvec2& slider_end_pos1, glm::dvec2& slider_end_pos2, int collision_check_type) {
+		std::vector<glm::dvec2> connector_pts;
+		kinematics::Kinematics kinematics = constructKinematics(points, moving_body, (collision_check_type == 1 || collision_check_type == 3), fixed_bodies, connector_pts);
 		kinematics.diagram.initialize();
 
 		// set the initial point of slider and direction
@@ -616,7 +621,8 @@ namespace kinematics {
 		}
 
 		// create a kinematics
-		kinematics::Kinematics kinematics = constructKinematics(points, moving_body, {});
+		std::vector<glm::dvec2> connector_pts;
+		kinematics::Kinematics kinematics = constructKinematics(points, moving_body, false, {}, connector_pts);
 		kinematics.diagram.initialize();
 
 		// initialize the trajectory of the moving body

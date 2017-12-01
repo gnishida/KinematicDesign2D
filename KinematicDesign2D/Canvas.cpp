@@ -308,13 +308,6 @@ namespace canvas {
 		}
 	}
 
-	void Canvas::showAssemblies(bool flag) {
-		for (int i = 0; i < kinematics.size(); i++) {
-			kinematics[i].showAssemblies(flag);
-		}
-		update();
-	}
-
 	void Canvas::showLinks(bool flag) {
 		for (int i = 0; i < kinematics.size(); i++) {
 			kinematics[i].showLinks(flag);
@@ -446,7 +439,8 @@ namespace canvas {
 			start = clock();
 
 			selected_solutions[i] = synthesis->findBestSolution(poses[i], solutions[i], enlarged_linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts[i], merged_fixed_bodies, moving_bodies[i], rotatable_crank, avoid_branch_defect, 1.0, weights, num_particles, num_iterations, record_file);
-			kinematics::Kinematics kin = synthesis->constructKinematics(selected_solutions[i].points, moving_bodies[i], fixed_bodies);
+			std::vector<glm::dvec2> connector_pts;
+			kinematics::Kinematics kin = synthesis->constructKinematics(selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
 
 			kinematics.push_back(kin);
 
@@ -463,6 +457,41 @@ namespace canvas {
 		std::cout << "Total computation time was " << (double)(end - start) / CLOCKS_PER_SEC << " sec." << std::endl;
 
 		update();
+	}
+
+	/**
+	* Construct a kinematic diagram based on the selected solution.
+	*/
+	void Canvas::constructKinematics() {
+		// the points of the modified linkage
+		std::vector<glm::dvec2> points;
+		if (selectedJoint.first >= 0 && selectedJoint.first < kinematics.size()) {
+			points.resize(kinematics[selectedJoint.first].diagram.joints.size());
+			for (int i = 0; i < kinematics[selectedJoint.first].diagram.joints.size(); i++) {
+				points[i] = kinematics[selectedJoint.first].diagram.joints[i]->pos;
+			}
+		}
+
+		kinematics.clear();
+
+		// construct kinamtics
+		for (int i = 0; i < selected_solutions.size(); i++) {
+			std::vector<glm::dvec2> connector_pts;
+			if (i == selectedJoint.first) {
+				// for the currently editing linkage, use the modified points
+				kinematics::Kinematics kin = synthesis->constructKinematics(points, moving_bodies[i], true, fixed_bodies, connector_pts);
+				kinematics.push_back(kin);
+			}
+			else {
+				kinematics::Kinematics kin = synthesis->constructKinematics(selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
+				kinematics.push_back(kin);
+			}
+		}
+
+		// setup the kinematic system
+		for (int i = 0; i < kinematics.size(); i++) {
+			kinematics[i].diagram.initialize();
+		}
 	}
 
 	/**
@@ -754,6 +783,8 @@ namespace canvas {
 						int selectedSolution = findSolution(solutions[linkage_id], pt, joint_id);
 
 						if (selectedSolution >= 0) {
+							selected_solutions[linkage_id] = solutions[linkage_id][selectedSolution];
+
 							// move the joints according to the selected solution
 							for (int i = 0; i < solutions[linkage_id][selectedSolution].points.size(); i++) {
 								kinematics[linkage_id].diagram.joints[i]->pos = solutions[linkage_id][selectedSolution].points[i];
@@ -773,6 +804,7 @@ namespace canvas {
 						}
 					}
 
+					/*
 					// update the geometry
 					for (int i = 0; i < moving_bodies.size(); i++) {
 						synthesis->updateBodies(kinematics[i], moving_bodies[i]);
@@ -787,6 +819,9 @@ namespace canvas {
 					for (int i = 0; i < kinematics.size(); i++) {
 						kinematics[i].diagram.initialize();
 					}
+					*/
+					// update the geometry
+					constructKinematics();
 					update();
 				}
 			}
@@ -800,6 +835,11 @@ namespace canvas {
 			history.push(design);
 			mode = MODE_SELECT;
 		}
+		else if (mode == MODE_KINEMATICS) {
+			constructKinematics();
+		}
+
+		update();
 	}
 
 	void Canvas::mouseDoubleClickEvent(QMouseEvent* e) {
