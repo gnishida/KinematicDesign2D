@@ -517,14 +517,27 @@ namespace kinematics {
 		}
 	}
 
-	bool KinematicDiagram::isCollided() const {
+	bool KinematicDiagram::isCollided(bool main_body_only) const {
+		// check the collision between rigid bodies
 		for (int i = 0; i < bodies.size(); ++i) {
 			for (int j = i + 1; j < bodies.size(); ++j) {
 				// skip the neighbors
 				if (bodies[i]->neighbors.contains(j)) continue;
 
-				if (polygonPolygonIntersection(bodies[i]->getActualPoints()[0], bodies[j]->getActualPoints()[0])) {
-					return true;
+				for (int k = 0; k < bodies[i]->polygons.size(); k++) {
+					if (main_body_only && k > 0) continue;
+
+					if (!bodies[i]->polygons[k].check_collision) continue;
+					std::vector<glm::dvec2> pts1 = bodies[i]->getActualPoints(k);
+
+					for (int l = 0; l < bodies[j]->polygons.size(); l++) {
+						if (main_body_only && l > 0) continue;
+
+						if (!bodies[j]->polygons[l].check_collision) continue;
+						std::vector<glm::dvec2> pts2 = bodies[j]->getActualPoints(l);
+
+						if (polygonPolygonIntersection(pts1, pts2)) return true;
+					}
 				}
 			}
 		}

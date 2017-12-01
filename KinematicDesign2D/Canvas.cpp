@@ -831,7 +831,9 @@ namespace canvas {
 	}
 
 	void Canvas::mouseReleaseEvent(QMouseEvent* e) {
-		if (mode == MODE_MOVE || mode == MODE_ROTATION || mode == MODE_RESIZE) {
+		if (e->button() == Qt::RightButton) {
+		}
+		else if (mode == MODE_MOVE || mode == MODE_ROTATION || mode == MODE_RESIZE) {
 			history.push(design);
 			mode = MODE_SELECT;
 		}

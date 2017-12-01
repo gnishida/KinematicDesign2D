@@ -52,11 +52,21 @@ namespace kinematics {
 			}
 		}
 
-		if (collision_check && isCollided()) {
-			throw "collision is detected.";
+		if (collision_check) {
+			if (diagram.isCollided(true)) throw "collision is detected.";
 		}
 	}
 
+	/**
+	* Step forward the linkage.
+	*
+	* @param collision_check	0 - no collision check
+	*                           1 - check collision and throw exception if collision occurs
+	*                           2 - check collision only for the main bodies and throw exception if collision occurs
+	*                           3 - only record the collision between connectors
+	* @param need_recovery_for_collision
+	*                           true - when collision occurs, recover the state right before the collision
+	*/
 	void Kinematics::stepForward(bool collision_check, bool need_recovery_for_collision) {
 		// save the current state
 		KinematicDiagram prev_state;
@@ -133,10 +143,6 @@ namespace kinematics {
 				throw ex;
 			}
 		}
-	}
-
-	bool Kinematics::isCollided() {
-		return diagram.isCollided();
 	}
 
 	void Kinematics::draw(QPainter& painter, const QPointF& origin, float scale) const {
