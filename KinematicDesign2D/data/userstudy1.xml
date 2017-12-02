@@ -1,0 +1,16 @@
+<design author="Gen Nishida" date="12/01/2017" version="1.0">
+    <fixed_body type="rectangle">
+        <pose x="-18.81679238335075" y="2.349999999999998" theta="0"/>
+        <params width="35.07275876990537" height="-6.516328600405678"/>
+    </fixed_body>
+    <moving_body>
+        <shape type="rectangle">
+            <pose x="-16.83316221590921" y="8.000300174884336" theta="-0.006294124797968204"/>
+            <params width="16" height="-5.300000000000001"/>
+        </shape>
+        <shape type="rectangle">
+            <pose x="-3.184252624133336" y="13.00841111010223" theta="-0.3383899821925764"/>
+            <params width="16" height="-5.300000000000001"/>
+        </shape>
+    </moving_body>
+</design>

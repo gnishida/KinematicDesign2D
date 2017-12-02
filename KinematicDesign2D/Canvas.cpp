@@ -804,22 +804,6 @@ namespace canvas {
 						}
 					}
 
-					/*
-					// update the geometry
-					for (int i = 0; i < moving_bodies.size(); i++) {
-						synthesis->updateBodies(kinematics[i], moving_bodies[i]);
-					}
-					for (int i = 0; i < fixed_bodies.size(); i++) {
-						for (int j = 0; j < kinematics.size(); j++) {
-							kinematics[j].diagram.addBody(kinematics[j].diagram.joints[0], kinematics[j].diagram.joints[1], fixed_bodies[i]);
-						}
-					}
-
-					// setup the kinematic system
-					for (int i = 0; i < kinematics.size(); i++) {
-						kinematics[i].diagram.initialize();
-					}
-					*/
 					// update the geometry
 					constructKinematics();
 					update();
