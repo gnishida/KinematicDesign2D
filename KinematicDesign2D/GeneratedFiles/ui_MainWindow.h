@@ -71,6 +71,7 @@ public:
     QAction *actionMirror;
     QAction *actionShowSolutions;
     QAction *actionShowGridLines;
+    QAction *actionShowInputPoses;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -270,6 +271,10 @@ public:
         actionShowGridLines->setObjectName(QStringLiteral("actionShowGridLines"));
         actionShowGridLines->setCheckable(true);
         actionShowGridLines->setChecked(true);
+        actionShowInputPoses = new QAction(MainWindowClass);
+        actionShowInputPoses->setObjectName(QStringLiteral("actionShowInputPoses"));
+        actionShowInputPoses->setCheckable(true);
+        actionShowInputPoses->setChecked(true);
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -353,6 +358,7 @@ public:
         menuEdit->addAction(actionCircularRepeat);
         menuView->addAction(actionShowSolutions);
         menuView->addAction(actionShowGridLines);
+        menuView->addAction(actionShowInputPoses);
 
         retranslateUi(MainWindowClass);
 
@@ -418,6 +424,7 @@ public:
         actionMirror->setText(QApplication::translate("MainWindowClass", "Mirror", 0));
         actionShowSolutions->setText(QApplication::translate("MainWindowClass", "Show Solutions", 0));
         actionShowGridLines->setText(QApplication::translate("MainWindowClass", "Show Grid Lines", 0));
+        actionShowInputPoses->setText(QApplication::translate("MainWindowClass", "Show Input Poses", 0));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "File", 0));
         menuTool->setTitle(QApplication::translate("MainWindowClass", "Kinematics", 0));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "Mode", 0));

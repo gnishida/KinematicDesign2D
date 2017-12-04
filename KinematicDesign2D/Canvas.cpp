@@ -36,6 +36,7 @@ namespace canvas {
 		collision_check = true;
 		show_solutions = false;
 		show_grid_lines = true;
+		show_input_poses = true;
 
 		selectedJoint = std::make_pair(-1, -1);
 		linkage_type = LINKAGE_4R;
@@ -605,21 +606,23 @@ namespace canvas {
 				}
 			}
 
-			// draw input shapes
-			painter.setPen(QPen(QColor(0, 0, 0), 1, Qt::DashLine));
-			painter.setBrush(QBrush(QColor(0, 0, 0, 0)));
-			for (int i = 0; i < design.moving_bodies.size(); i++) {
-				for (int j = 0; j < design.moving_bodies[i].poses.size(); j++) {
-					//design.moving_bodies[i].poses[design.layer_id]->draw(painter, QColor(0, 255, 0, 60), origin, scale);
-					QPolygonF pts;
-					std::vector<glm::dvec2>& body = design.moving_bodies[i].poses[j]->getPoints();
-					for (int k = 0; k < body.size(); k++) {
-						pts.push_back(QPointF(origin.x() + body[k].x * scale, origin.y() - body[k].y * scale));
+			// draw input poses
+			if (show_input_poses) {
+				painter.setPen(QPen(QColor(0, 0, 0), 1, Qt::DashLine));
+				painter.setBrush(QBrush(QColor(0, 0, 0, 0)));
+				for (int i = 0; i < design.moving_bodies.size(); i++) {
+					for (int j = 0; j < design.moving_bodies[i].poses.size(); j++) {
+						QPolygonF pts;
+						std::vector<glm::dvec2>& body = design.moving_bodies[i].poses[j]->getPoints();
+						for (int k = 0; k < body.size(); k++) {
+							pts.push_back(QPointF(origin.x() + body[k].x * scale, origin.y() - body[k].y * scale));
+						}
+						painter.drawPolygon(pts);
 					}
-					painter.drawPolygon(pts);
 				}
 			}
 
+			// draw 2D mechanism
 			for (int i = 0; i < kinematics.size(); i++) {
 				kinematics[i].draw(painter, origin, scale);
 			}

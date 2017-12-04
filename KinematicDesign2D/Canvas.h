@@ -49,6 +49,7 @@ namespace canvas {
 		bool collision_check;
 		bool show_solutions;
 		bool show_grid_lines;
+		bool show_input_poses;
 		QPointF prev_mouse_pt;
 		QPointF origin;
 		double scale;
