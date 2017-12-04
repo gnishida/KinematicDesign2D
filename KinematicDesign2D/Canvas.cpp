@@ -334,7 +334,7 @@ namespace canvas {
 		return glm::dvec2(origin.x() + p.x * scale, origin.y() - p.y * scale);
 	}
 
-	void Canvas::calculateSolutions(int linkage_type, int num_samples, std::vector<std::pair<double, double>>& sigmas, bool avoid_branch_defect, bool rotatable_crank, const std::vector<double>& weights, int num_particles, int num_iterations, bool record_file) {
+	void Canvas::calculateSolutions(int linkage_type, int num_samples, std::vector<std::pair<double, double>>& sigmas, bool avoid_branch_defect, double min_transmission_angle, bool rotatable_crank, const std::vector<double>& weights, int num_particles, int num_iterations, bool record_file) {
 		mainWin->ui.statusBar->showMessage("Please wait for a moment...");
 		
 		// change the mode to kinematics
@@ -421,7 +421,7 @@ namespace canvas {
 			
 			// calculate the circle point curve and center point curve
 			std::vector<glm::dvec2> enlarged_linkage_region_pts;
-			synthesis->calculateSolution(poses[i], linkage_region_pts[i], linkage_avoidance_pts[i], num_samples, merged_fixed_bodies, moving_bodies[i], sigmas, rotatable_crank, avoid_branch_defect, 1.0, solutions[i], enlarged_linkage_region_pts);
+			synthesis->calculateSolution(poses[i], linkage_region_pts[i], linkage_avoidance_pts[i], num_samples, merged_fixed_bodies, moving_bodies[i], sigmas, rotatable_crank, avoid_branch_defect, min_transmission_angle, 1.0, solutions[i], enlarged_linkage_region_pts);
 
 			time_t end = clock();
 			std::cout << "Elapsed: " << (double)(end - start) / CLOCKS_PER_SEC << " sec for obtaining " << solutions[i].size() << " candidates." << std::endl;
@@ -435,7 +435,7 @@ namespace canvas {
 
 			start = clock();
 
-			selected_solutions[i] = synthesis->findBestSolution(poses[i], solutions[i], enlarged_linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts[i], merged_fixed_bodies, moving_bodies[i], rotatable_crank, avoid_branch_defect, 1.0, weights, num_particles, num_iterations, record_file);
+			selected_solutions[i] = synthesis->findBestSolution(poses[i], solutions[i], enlarged_linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts[i], merged_fixed_bodies, moving_bodies[i], rotatable_crank, avoid_branch_defect, min_transmission_angle, 1.0, weights, num_particles, num_iterations, record_file);
 			std::vector<glm::dvec2> connector_pts;
 			kinematics::Kinematics kin = synthesis->constructKinematics(selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
 
