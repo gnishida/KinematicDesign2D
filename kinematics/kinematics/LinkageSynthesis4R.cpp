@@ -235,7 +235,7 @@ namespace kinematics {
 
 		// collision check for the main body
 		// moving_body[0] means the main body without the joint connectors
-		if (checkCollision(poses, points, fixed_bodies, moving_body[0], linkage_avoidance_pts, avoid_branch_defect, min_transmission_angle)) return false;
+		if (checkCollision(poses, points, fixed_bodies, moving_body[0], linkage_avoidance_pts)) return false;
 
 		return true;
 	}
@@ -552,7 +552,7 @@ namespace kinematics {
 	* @param linkage_avoidance_pts	region to avoid for the linkage
 	* @return						true if collision occurs
 	*/
-	bool LinkageSynthesis4R::checkCollision(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const std::vector<Object25D>& fixed_bodies, const Object25D& moving_body, const std::vector<glm::dvec2>& linkage_avoidance_pts, bool avoid_branch_defect, double min_transmission_angle) {
+	bool LinkageSynthesis4R::checkCollision(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const std::vector<Object25D>& fixed_bodies, const Object25D& moving_body, const std::vector<glm::dvec2>& linkage_avoidance_pts) {
 		std::vector<glm::dvec2> connector_pts;
 		kinematics::Kinematics kinematics = constructKinematics(points, moving_body, false, fixed_bodies, connector_pts);
 		kinematics.diagram.initialize();

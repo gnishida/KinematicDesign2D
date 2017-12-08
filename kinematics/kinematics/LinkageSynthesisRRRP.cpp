@@ -291,7 +291,7 @@ namespace kinematics {
 		// collision check
 		// moving_body[0] means the main body without the joint connectors
 		glm::dvec2 slider_end_pos1, slider_end_pos2;
-		if (checkCollision(poses, points, fixed_bodies, moving_body[0], linkage_avoidance_pts, slider_end_pos1, slider_end_pos2, avoid_branch_defect, min_transmission_angle)) return false;
+		if (checkCollision(poses, points, fixed_bodies, moving_body[0], linkage_avoidance_pts, slider_end_pos1, slider_end_pos2)) return false;
 
 		// locate the two endpoints of the bar
 		points[1] = slider_end_pos1 - slider_dir * 2.0;
@@ -462,7 +462,7 @@ namespace kinematics {
 	* @param linkage_avoidance_pts	region to avoid for the linkage
 	* @return						true if collision occurs
 	*/
-	bool LinkageSynthesisRRRP::checkCollision(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const std::vector<Object25D>& fixed_bodies, const Object25D& moving_body, const std::vector<glm::dvec2>& linkage_avoidance_pts, glm::dvec2& slider_end_pos1, glm::dvec2& slider_end_pos2, bool avoid_branch_defect, double min_transmission_angle) {
+	bool LinkageSynthesisRRRP::checkCollision(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& points, const std::vector<Object25D>& fixed_bodies, const Object25D& moving_body, const std::vector<glm::dvec2>& linkage_avoidance_pts, glm::dvec2& slider_end_pos1, glm::dvec2& slider_end_pos2) {
 		std::vector<glm::dvec2> connector_pts;
 		kinematics::Kinematics kinematics = constructKinematics(points, moving_body, false, fixed_bodies, connector_pts);
 		kinematics.diagram.initialize();
