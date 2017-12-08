@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	connect(ui.actionRun, SIGNAL(triggered()), this, SLOT(onRun()));
 	connect(ui.actionRunBackward, SIGNAL(triggered()), this, SLOT(onRunBackward()));
 	connect(ui.actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
+	connect(ui.actionResetPosition, SIGNAL(triggered()), this, SLOT(onResetPosition()));
 	connect(ui.actionStepForward, SIGNAL(triggered()), this, SLOT(onStepForward()));
 	connect(ui.actionStepBackward, SIGNAL(triggered()), this, SLOT(onStepBackward()));
 	connect(ui.actionCollisionCheck, SIGNAL(triggered()), this, SLOT(onCollisionCheck()));
@@ -92,6 +93,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	ui.mainToolBar->addAction(ui.actionStepBackward);
 	ui.mainToolBar->addAction(ui.actionRun);
 	ui.mainToolBar->addAction(ui.actionStop);
+	ui.mainToolBar->addAction(ui.actionResetPosition);
 	ui.mainToolBar->addAction(ui.actionStepForward);
 }
 
@@ -346,6 +348,10 @@ void MainWindow::onRunBackward() {
 
 void MainWindow::onStop() {
 	canvas->stop();
+}
+
+void MainWindow::onResetPosition() {
+	canvas->resetPosition();
 }
 
 void MainWindow::onStepForward() {

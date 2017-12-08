@@ -17,10 +17,11 @@ namespace kinematics {
 		QMap<int, glm::dvec2> original_shape;
 		double angle;
 		bool driver;
+		bool actual_link;	// the coupler in the 4R four-bar linkage is usually no actual link because the moving body is used as a coupler.
 
 	public:
 		Link(int id);
-		Link(int id, bool driver);
+		Link(int id, bool driver, bool actual_link);
 
 		bool isDetermined();
 		bool isGrounded();

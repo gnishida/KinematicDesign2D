@@ -48,7 +48,7 @@ namespace kinematics {
 				copied_joints.push_back(copied_diagram.joints[links[i]->joints[j]->id]);
 			}
 
-			copied_diagram.addLink(links[i]->driver, copied_joints);
+			copied_diagram.addLink(links[i]->driver, copied_joints, links[i]->actual_link);
 		}
 
 		// copy the original shape of the links
@@ -79,7 +79,7 @@ namespace kinematics {
 	}
 
 	void KinematicDiagram::clear() {
-		joints.clear(); 
+		joints.clear();
 		links.clear();
 		bodies.clear();
 	}
@@ -123,28 +123,28 @@ namespace kinematics {
 		return newLink(false);
 	}
 
-	boost::shared_ptr<Link> KinematicDiagram::newLink(bool driver) {
+	boost::shared_ptr<Link> KinematicDiagram::newLink(bool driver, bool actual_link) {
 		int id = 0;
 		if (!links.empty()) {
 			id = links.lastKey() + 1;
 		}
 
-		boost::shared_ptr<Link> link = boost::shared_ptr<Link>(new Link(id, driver));
+		boost::shared_ptr<Link> link = boost::shared_ptr<Link>(new Link(id, driver, actual_link));
 		links[id] = link;
 		return link;
 	}
 
-	boost::shared_ptr<Link> KinematicDiagram::addLink(boost::shared_ptr<Joint> joint1, boost::shared_ptr<Joint> joint2) {
-		return addLink(false, joint1, joint2);
+	boost::shared_ptr<Link> KinematicDiagram::addLink(boost::shared_ptr<Joint> joint1, boost::shared_ptr<Joint> joint2, bool actual_link) {
+		return addLink(false, joint1, joint2, actual_link);
 	}
 
-	boost::shared_ptr<Link> KinematicDiagram::addLink(bool driver, boost::shared_ptr<Joint> joint1, boost::shared_ptr<Joint> joint2) {
+	boost::shared_ptr<Link> KinematicDiagram::addLink(bool driver, boost::shared_ptr<Joint> joint1, boost::shared_ptr<Joint> joint2, bool actual_link) {
 		int id = 0;
 		if (!links.empty()) {
 			id = links.lastKey() + 1;
 		}
 
-		boost::shared_ptr<Link> link = boost::shared_ptr<Link>(new Link(id, driver));
+		boost::shared_ptr<Link> link = boost::shared_ptr<Link>(new Link(id, driver, actual_link));
 		links[id] = link;
 
 		link->addJoint(joint1);
@@ -155,17 +155,17 @@ namespace kinematics {
 		return link;
 	}
 
-	boost::shared_ptr<Link> KinematicDiagram::addLink(std::vector<boost::shared_ptr<Joint>> joints) {
-		return addLink(false, joints);
+	boost::shared_ptr<Link> KinematicDiagram::addLink(std::vector<boost::shared_ptr<Joint>> joints, bool actual_link) {
+		return addLink(false, joints, actual_link);
 	}
 
-	boost::shared_ptr<Link> KinematicDiagram::addLink(bool driver, std::vector<boost::shared_ptr<Joint>> joints) {
+	boost::shared_ptr<Link> KinematicDiagram::addLink(bool driver, std::vector<boost::shared_ptr<Joint>> joints, bool actual_link) {
 		int id = 0;
 		if (!links.empty()) {
 			id = links.lastKey() + 1;
 		}
 
-		boost::shared_ptr<Link> link = boost::shared_ptr<Link>(new Link(id, driver));
+		boost::shared_ptr<Link> link = boost::shared_ptr<Link>(new Link(id, driver, actual_link));
 		links[id] = link;
 
 		for (int i = 0; i < joints.size(); ++i) {
@@ -424,8 +424,6 @@ namespace kinematics {
 
 		// initialize the adancency between rigid bodies
 		initialize();
-
-		//trace_end_effector.resize(assemblies.size());
 	}
 
 	void KinematicDiagram::save(const QString& filename) {

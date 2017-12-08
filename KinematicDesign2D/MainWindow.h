@@ -47,6 +47,7 @@ public slots:
 	void onRun();
 	void onRunBackward();
 	void onStop();
+	void onResetPosition();
 	void onStepForward();
 	void onStepBackward();
 	void onCollisionCheck();

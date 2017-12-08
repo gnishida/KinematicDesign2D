@@ -1,0 +1,61 @@
+<design date="12/07/2017" author="Gen Nishida" version="1.0">
+    <fixed_body type="rectangle">
+        <pose x="-6.081250000000003" theta="0" y="-0.125"/>
+        <params height="-1.5625" width="33.56250000000001"/>
+    </fixed_body>
+    <fixed_body type="polygon">
+        <pose x="7.756818181818177" theta="0" y="14.15909090909091"/>
+        <point x="0" y="0"/>
+        <point x="7.409090909090912" y="0"/>
+        <point x="8.63636363636364" y="-5.454545454545455"/>
+        <point x="16.18181818181819" y="-5.454545454545455"/>
+        <point x="16.18181818181819" y="-11.95454545454546"/>
+        <point x="-1.681818181818183" y="-11.95454545454546"/>
+        <point x="-1.681818181818183" y="-11.09090909090909"/>
+    </fixed_body>
+    <fixed_body type="circle">
+        <pose x="8.165909090909086" theta="0" y="4.477272727272723"/>
+        <params height="-4.409090909090912" width="4.409090909090912"/>
+    </fixed_body>
+    <fixed_body type="circle">
+        <pose x="18.21136363636364" theta="0" y="4.477272727272723"/>
+        <params height="-4.409090909090912" width="4.409090909090912"/>
+    </fixed_body>
+    <moving_body>
+        <shape type="polygon">
+            <pose x="5.75" theta="0" y="5.45"/>
+            <point x="0" y="0"/>
+            <point x="-1.1" y="-5.2"/>
+            <point x="-6.5" y="-5.2"/>
+            <point x="-8.300000000000001" y="0"/>
+        </shape>
+        <shape type="polygon">
+            <pose x="6.149999999999999" theta="0" y="9.559090909090919"/>
+            <point x="0" y="0"/>
+            <point x="-1.1" y="-5.2"/>
+            <point x="-6.5" y="-5.2"/>
+            <point x="-8.300000000000001" y="0"/>
+        </shape>
+        <shape type="polygon">
+            <pose x="6.649999999999997" theta="0" y="13.65"/>
+            <point x="0" y="0"/>
+            <point x="-1.1" y="-5.2"/>
+            <point x="-6.5" y="-5.2"/>
+            <point x="-8.300000000000001" y="0"/>
+        </shape>
+        <linkage_region type="polygon">
+            <pose x="-2.956250000000001" theta="0" y="13.25"/>
+            <point x="0" y="0"/>
+            <point x="14.4375" y="0"/>
+            <point x="14.4375" y="-12.875"/>
+            <point x="-0.06250000000000044" y="-12.875"/>
+        </linkage_region>
+        <linkage_avoidance type="polygon">
+            <pose x="-6.018750000000003" theta="0" y="-0.06250000000000001"/>
+            <point x="0" y="0"/>
+            <point x="33.56250000000001" y="-0.06250000000000001"/>
+            <point x="33.50000000000001" y="-1.6875"/>
+            <point x="0" y="-1.6875"/>
+        </linkage_avoidance>
+    </moving_body>
+</design>

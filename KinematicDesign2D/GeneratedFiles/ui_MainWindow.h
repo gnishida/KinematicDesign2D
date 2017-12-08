@@ -72,6 +72,7 @@ public:
     QAction *actionShowSolutions;
     QAction *actionShowGridLines;
     QAction *actionShowInputPoses;
+    QAction *actionResetPosition;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -275,6 +276,11 @@ public:
         actionShowInputPoses->setObjectName(QStringLiteral("actionShowInputPoses"));
         actionShowInputPoses->setCheckable(true);
         actionShowInputPoses->setChecked(true);
+        actionResetPosition = new QAction(MainWindowClass);
+        actionResetPosition->setObjectName(QStringLiteral("actionResetPosition"));
+        QIcon icon24;
+        icon24.addFile(QStringLiteral("Resources/reset.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionResetPosition->setIcon(icon24);
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -323,6 +329,7 @@ public:
         menuTool->addAction(actionRun);
         menuTool->addAction(actionRunBackward);
         menuTool->addAction(actionStop);
+        menuTool->addAction(actionResetPosition);
         menuTool->addSeparator();
         menuTool->addAction(actionStepForward);
         menuTool->addAction(actionStepBackward);
@@ -425,6 +432,7 @@ public:
         actionShowSolutions->setText(QApplication::translate("MainWindowClass", "Show Solutions", 0));
         actionShowGridLines->setText(QApplication::translate("MainWindowClass", "Show Grid Lines", 0));
         actionShowInputPoses->setText(QApplication::translate("MainWindowClass", "Show Input Poses", 0));
+        actionResetPosition->setText(QApplication::translate("MainWindowClass", "Reset Position", 0));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "File", 0));
         menuTool->setTitle(QApplication::translate("MainWindowClass", "Kinematics", 0));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "Mode", 0));

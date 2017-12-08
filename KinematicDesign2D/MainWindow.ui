@@ -44,6 +44,7 @@
     <addaction name="actionRun"/>
     <addaction name="actionRunBackward"/>
     <addaction name="actionStop"/>
+    <addaction name="actionResetPosition"/>
     <addaction name="separator"/>
     <addaction name="actionStepForward"/>
     <addaction name="actionStepBackward"/>
@@ -547,6 +548,15 @@
    </property>
    <property name="text">
     <string>Show Input Poses</string>
+   </property>
+  </action>
+  <action name="actionResetPosition">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/reset.png</normaloff>Resources/reset.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reset Position</string>
    </property>
   </action>
  </widget>

@@ -29,6 +29,16 @@ namespace kinematics {
 		diagram.save(filename);
 	}
 
+	void Kinematics::initialize() {
+		diagram_original = diagram.clone();
+		diagram.initialize();
+	}
+
+	void Kinematics::reset() {
+		diagram = diagram_original.clone();
+		diagram.initialize();
+	}
+
 	void Kinematics::forwardKinematics(bool collision_check) {
 		std::list<boost::shared_ptr<Joint>> queue;
 

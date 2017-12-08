@@ -17,6 +17,7 @@ namespace kinematics {
 	class Kinematics {
 	public:
 		KinematicDiagram diagram;
+		KinematicDiagram diagram_original;
 		double simulation_speed;
 		bool show_links;
 		bool show_bodies;
@@ -27,6 +28,8 @@ namespace kinematics {
 		void clear();
 		void load(const QString& filename);
 		void save(const QString& filename);
+		void initialize();
+		void reset();
 		void forwardKinematics(bool collision_check);
 		void stepForward(bool collision_check, bool need_recovery_for_collision = true);
 		void stepBackward(bool collision_check, bool need_recovery_for_collision = true);

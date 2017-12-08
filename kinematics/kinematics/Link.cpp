@@ -8,12 +8,14 @@ namespace kinematics {
 		this->id = id;
 		this->angle = 0;
 		this->driver = false;
+		this->actual_link = true;
 	}
 
-	Link::Link(int id, bool driver) {
+	Link::Link(int id, bool driver, bool actual_link) {
 		this->id = id;
 		this->angle = 0;
 		this->driver = driver;
+		this->actual_link = actual_link;
 	}
 
 	bool Link::isDetermined() {
@@ -94,14 +96,25 @@ namespace kinematics {
 			painter.setPen(QPen(QColor(0, 0, 0), 3));
 		}
 		else {
-			painter.setPen(QPen(QColor(90, 90, 90), 3));
+			if (actual_link) {
+				painter.setPen(QPen(QColor(90, 90, 90), 3));
+			}
+			else {
+				painter.setPen(QPen(QColor(150, 150, 150), 3, Qt::DotLine));
+			}
 		}
-		painter.setBrush(QBrush(QColor(192, 192, 192, 64)));
-		QPolygon polygon;
-		for (int i = 0; i < joints.size(); ++i) {
-			polygon.append(QPoint(origin.x() + joints[i]->pos.x * scale, origin.y() - joints[i]->pos.y * scale));
+
+		if (joints.size() == 2) {
+			painter.drawLine(origin.x() + joints[0]->pos.x * scale, origin.y() - joints[0]->pos.y * scale, origin.x() + joints[1]->pos.x * scale, origin.y() - joints[1]->pos.y * scale);
 		}
-		painter.drawPolygon(polygon);
+		else {
+			painter.setBrush(QBrush(QColor(192, 192, 192, 64)));
+			QPolygon polygon;
+			for (int i = 0; i < joints.size(); ++i) {
+				polygon.append(QPoint(origin.x() + joints[i]->pos.x * scale, origin.y() - joints[i]->pos.y * scale));
+			}
+			painter.drawPolygon(polygon);
+		}
 
 		painter.restore();
 	}

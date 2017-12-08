@@ -259,6 +259,15 @@ namespace canvas {
 		}
 	}
 
+	void Canvas::resetPosition() {
+		stop();
+
+		for (int i = 0; i < kinematics.size(); i++) {
+			kinematics[i].reset();
+		}
+		update();
+	}
+
 	void Canvas::speedUp() {
 		for (int i = 0; i < kinematics.size(); i++) {
 			kinematics[i].speedUp();
@@ -285,8 +294,8 @@ namespace canvas {
 				}
 				catch (char* ex) {
 					kinematics[i].invertSpeed();
-					std::cerr << "Animation is stopped by error:" << std::endl;
-					std::cerr << ex << std::endl;
+					//std::cerr << "Animation is stopped by error:" << std::endl;
+					//std::cerr << ex << std::endl;
 				}
 			}
 			update();
@@ -301,8 +310,8 @@ namespace canvas {
 				}
 				catch (char* ex) {
 					kinematics[i].invertSpeed();
-					std::cerr << "Animation is stopped by error:" << std::endl;
-					std::cerr << ex << std::endl;
+					//std::cerr << "Animation is stopped by error:" << std::endl;
+					//std::cerr << ex << std::endl;
 				}
 			}
 			update();
@@ -334,6 +343,19 @@ namespace canvas {
 	glm::dvec2 Canvas::worldToScreenCoordinates(const glm::dvec2& p) {
 		return glm::dvec2(origin.x() + p.x * scale, origin.y() - p.y * scale);
 	}
+
+	std::string Canvas::currentDateTime() {
+		time_t     now = time(0);
+		struct tm  tstruct;
+		char       buf[80];
+		tstruct = *localtime(&now);
+		// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+		// for more information about date/time format
+		strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+		return buf;
+	}
+
 
 	void Canvas::calculateSolutions(int linkage_type, int num_samples, std::vector<std::pair<double, double>>& sigmas, bool avoid_branch_defect, double min_transmission_angle, bool rotatable_crank, const std::vector<double>& weights, int num_particles, int num_iterations, bool record_file) {
 		mainWin->ui.statusBar->showMessage("Please wait for a moment...");
@@ -455,7 +477,7 @@ namespace canvas {
 
 		// setup the kinematic system
 		for (int i = 0; i < kinematics.size(); i++) {
-			kinematics[i].diagram.initialize();
+			kinematics[i].initialize();
 		}
 
 		time_t end = clock();
@@ -495,7 +517,7 @@ namespace canvas {
 
 		// setup the kinematic system
 		for (int i = 0; i < kinematics.size(); i++) {
-			kinematics[i].diagram.initialize();
+			kinematics[i].initialize();
 		}
 	}
 
@@ -528,9 +550,8 @@ namespace canvas {
 			}
 			catch (char* ex) {
 				kinematics[i].invertSpeed();
-				//stop();
-				std::cerr << "Animation is stopped by error:" << std::endl;
-				std::cerr << ex << std::endl;
+				//std::cerr << "Animation is stopped by error:" << std::endl;
+				//std::cerr << ex << std::endl;
 			}
 		}
 
@@ -706,13 +727,14 @@ namespace canvas {
 				}
 			}
 			else if (mode == MODE_KINEMATICS) {
+				resetPosition();
+
 				// convert the mouse position to the world coordinate system
 				glm::dvec2 pt = screenToWorldCoordinates(e->x(), e->y());
-				//glm::dvec2 pt((e->x() - origin.x()) / scale, -(e->y() - origin.y()) / scale);
 
 				// select a joint to move
 				selectedJoint = std::make_pair(-1, -1);
-				double min_dist = 6;
+				double min_dist = 2;
 				for (int i = 0; i < kinematics.size(); i++) {
 					for (int j = 0; j < kinematics[i].diagram.joints.size(); j++) {
 						if (ctrlPressed && j >= 2) continue;
@@ -829,7 +851,9 @@ namespace canvas {
 			mode = MODE_SELECT;
 		}
 		else if (mode == MODE_KINEMATICS) {
-			constructKinematics();
+			if (selectedJoint.first >= 0) {
+				constructKinematics();
+			}
 		}
 
 		update();
@@ -918,6 +942,16 @@ namespace canvas {
 		switch (e->key()) {
 		case Qt::Key_Escape:
 			break;
+		case Qt::Key_P:
+			std::cout << "-------------------------------------------" << std::endl;
+			std::cout << currentDateTime() << std::endl;
+			for (int i = 0; i < kinematics.size(); i++) {
+				for (int j = 0; j < kinematics[i].diagram.joints.size(); j++) {
+					std::cout << j << ": (" << kinematics[i].diagram.joints[j]->pos.x << "," << kinematics[i].diagram.joints[j]->pos.y << ")" << std::endl;
+				}
+			}
+			std::cout << "-------------------------------------------" << std::endl;
+			break;
 		case Qt::Key_Space:
 			// start/stop the animation
 			if (animation_timer == NULL) {
@@ -925,6 +959,7 @@ namespace canvas {
 			}
 			else {
 				stop();
+				resetPosition();
 			}
 			break;
 		}

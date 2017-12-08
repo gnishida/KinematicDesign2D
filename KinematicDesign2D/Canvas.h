@@ -77,6 +77,7 @@ namespace canvas {
 		void run();
 		void runBackward();
 		void stop();
+		void resetPosition();
 		void speedUp();
 		void speedDown();
 		void invertSpeed();
@@ -87,6 +88,7 @@ namespace canvas {
 		glm::dvec2 screenToWorldCoordinates(const glm::dvec2& p);
 		glm::dvec2 screenToWorldCoordinates(double x, double y);
 		glm::dvec2 worldToScreenCoordinates(const glm::dvec2& p);
+		std::string currentDateTime();
 
 		void calculateSolutions(int linkage_type, int num_samples, std::vector<std::pair<double, double>>& sigmas, bool avoid_branch_defect, double min_transmission_angle, bool rotatable_crank, const std::vector<double>& weights, int num_particles, int num_iterations, bool record_file);
 		void constructKinematics();

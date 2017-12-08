@@ -225,7 +225,7 @@ namespace kinematics {
 			dist += dist_map.at<double>(solution.points[i].y - dist_map_bbox.minPt.y, solution.points[i].x - dist_map_bbox.minPt.x);
 		}
 		double tortuosity = tortuosityOfTrajectory(solution.poses, solution.points, moving_body);
-		double size = glm::length(solution.points[0] - solution.points[2]) + glm::length(solution.points[1] - solution.points[3]) + glm::length(solution.points[2] - solution.points[3]);
+		double size = glm::length(solution.points[0] - solution.points[2]) + glm::length(solution.points[1] - solution.points[3]);
 
 		return solution.position_error * weights[0] + solution.orientation_error * weights[1] + dist * weights[2] + tortuosity * weights[3] + size * weights[4];
 	}
@@ -240,9 +240,9 @@ namespace kinematics {
 		kin.diagram.addJoint(boost::shared_ptr<kinematics::PinJoint>(new kinematics::PinJoint(2, false, points[2])));
 		kin.diagram.addJoint(boost::shared_ptr<kinematics::SliderHinge>(new kinematics::SliderHinge(3, false, points[3])));
 		kin.diagram.addJoint(boost::shared_ptr<kinematics::PinJoint>(new kinematics::PinJoint(4, true, points[4])));
-		kin.diagram.addLink(true, kin.diagram.joints[0], kin.diagram.joints[2]);
-		kin.diagram.addLink(false, { kin.diagram.joints[1], kin.diagram.joints[3], kin.diagram.joints[4] });
-		kin.diagram.addLink(false, kin.diagram.joints[2], kin.diagram.joints[3]);
+		kin.diagram.addLink(true, kin.diagram.joints[0], kin.diagram.joints[2], true);
+		kin.diagram.addLink(false, { kin.diagram.joints[1], kin.diagram.joints[3], kin.diagram.joints[4] }, true);
+		kin.diagram.addLink(false, kin.diagram.joints[2], kin.diagram.joints[3], false);
 
 		std::vector<Object25D> copied_fixed_bodies = fixed_bodies;
 
