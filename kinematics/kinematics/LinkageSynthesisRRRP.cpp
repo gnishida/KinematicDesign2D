@@ -9,13 +9,14 @@
 
 namespace kinematics {
 	
-	LinkageSynthesisRRRP::LinkageSynthesisRRRP(const std::vector<Object25D>& fixed_bodies, const std::vector<std::pair<double, double>>& sigmas, bool rotatable_crank, bool avoid_branch_defect, double min_transmission_angle, double min_link_length) {
+	LinkageSynthesisRRRP::LinkageSynthesisRRRP(const std::vector<Object25D>& fixed_bodies, const std::vector<std::pair<double, double>>& sigmas, bool rotatable_crank, bool avoid_branch_defect, double min_transmission_angle, double min_link_length, const std::vector<double>& weights) {
 		this->fixed_bodies = fixed_bodies;
 		this->sigmas = sigmas;
 		this->rotatable_crank = rotatable_crank;
 		this->avoid_branch_defect = avoid_branch_defect;
 		this->min_transmission_angle = min_transmission_angle;
 		this->min_link_length = min_link_length;
+		this->weights = weights;
 	}
 
 	/**
@@ -217,10 +218,10 @@ namespace kinematics {
 		return true;
 	}
 
-	Solution LinkageSynthesisRRRP::findBestSolution(const std::vector<glm::dmat3x3>& poses, std::vector<Solution>& solutions, const std::vector<glm::dvec2>& linkage_region_pts, const cv::Mat& dist_map, const BBox& dist_map_bbox, const std::vector<glm::dvec2>& linkage_avoidance_pts, const Object25D& moving_body, const std::vector<double>& weights, int num_particles, int num_iterations, bool record_file) {
+	Solution LinkageSynthesisRRRP::findBestSolution(const std::vector<glm::dmat3x3>& poses, std::vector<Solution>& solutions, const std::vector<glm::dvec2>& linkage_region_pts, const cv::Mat& dist_map, const BBox& dist_map_bbox, const std::vector<glm::dvec2>& linkage_avoidance_pts, const Object25D& moving_body, int num_particles, int num_iterations, bool record_file) {
 		// select the best solution based on the objective function
 		if (solutions.size() > 0) {
-			particleFilter(solutions, linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts, moving_body, weights, num_particles, num_iterations, record_file);
+			particleFilter(solutions, linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts, moving_body, num_particles, num_iterations, record_file);
 			return solutions[0];
 		}
 		else {
@@ -228,7 +229,7 @@ namespace kinematics {
 		}
 	}
 
-	double LinkageSynthesisRRRP::calculateCost(Solution& solution, const Object25D& moving_body, const cv::Mat& dist_map, const BBox& dist_map_bbox, const std::vector<double>& weights) {
+	double LinkageSynthesisRRRP::calculateCost(Solution& solution, const Object25D& moving_body, const cv::Mat& dist_map, const BBox& dist_map_bbox) {
 		double dist = 0;
 		for (int i = 0; i < solution.points.size(); i++) {
 			dist += dist_map.at<double>(solution.points[i].y - dist_map_bbox.minPt.y, solution.points[i].x - dist_map_bbox.minPt.x);
@@ -256,7 +257,7 @@ namespace kinematics {
 		std::vector<Object25D> copied_fixed_bodies = fixed_bodies;
 
 		// update the geometry
-		updateBodies(kin, moving_body);
+		updateMovingBodies(kin, moving_body);
 
 		if (connect_joints) {
 			kin.diagram.connectJointsToBodies(copied_fixed_bodies, connected_pts);
@@ -273,7 +274,7 @@ namespace kinematics {
 	/**
 	* update bodies.
 	*/
-	void LinkageSynthesisRRRP::updateBodies(Kinematics& kin, const Object25D& moving_body) {
+	void LinkageSynthesisRRRP::updateMovingBodies(Kinematics& kin, const Object25D& moving_body) {
 		kin.diagram.bodies.clear();
 		kin.diagram.addBody(kin.diagram.joints[2], kin.diagram.joints[3], moving_body);
 	}
