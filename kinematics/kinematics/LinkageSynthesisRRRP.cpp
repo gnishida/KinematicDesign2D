@@ -567,6 +567,7 @@ namespace kinematics {
 			if (avoid_branch_defect) {
 				glm::dvec2 a = kinematics.diagram.joints[2]->pos - kinematics.diagram.joints[3]->pos;
 				glm::dvec2 b = kinematics.diagram.joints[3]->pos - kinematics.diagram.joints[1]->pos;
+				b = glm::dvec2(-b.y, b.x);
 				double t_angle = std::acos(glm::dot(a, b) / glm::length(a) / glm::length(b));
 				if (std::abs(t_angle) < min_transmission_angle) return true;
 			}
