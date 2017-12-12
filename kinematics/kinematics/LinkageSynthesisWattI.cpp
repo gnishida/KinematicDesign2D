@@ -314,6 +314,8 @@ namespace kinematics {
 			dist += dist_map.at<double>(solution.points[i].y - dist_map_bbox.minPt.y, solution.points[i].x - dist_map_bbox.minPt.x);
 		}
 		double tortuosity = tortuosityOfTrajectory(solution.poses, solution.points, moving_body);
+		std::vector<glm::dvec2> connected_pts;
+		Kinematics kin = constructKinematics(solution.points, moving_body, true, fixed_bodies, connected_pts);
 		double size = glm::length(solution.points[0] - solution.points[2]) + glm::length(solution.points[1] - solution.points[3]);
 
 		return solution.position_error * weights[0] + solution.orientation_error * weights[1] + dist * weights[2] + tortuosity * weights[3] + size * weights[4];
