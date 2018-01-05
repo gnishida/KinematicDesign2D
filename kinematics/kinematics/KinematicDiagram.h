@@ -81,7 +81,7 @@ namespace kinematics {
 		void save(const QString& filename);
 		void updateBodyAdjacency();
 		bool isCollided(bool main_body_only) const;
-		void draw(QPainter& painter, const QPointF& origin, float scale, bool show_bodies, bool show_links) const;
+		void draw(QPainter& painter, const QPointF& origin, float scale, bool show_linkage) const;
 	};
 
 }

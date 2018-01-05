@@ -13,8 +13,6 @@ namespace kinematics {
 
 	Kinematics::Kinematics(double simulation_speed) {
 		this->simulation_speed = simulation_speed;
-		show_links = true;
-		show_bodies = true;
 	}
 
 	void Kinematics::clear() {
@@ -155,8 +153,8 @@ namespace kinematics {
 		}
 	}
 
-	void Kinematics::draw(QPainter& painter, const QPointF& origin, float scale) const {
-		diagram.draw(painter, origin, scale, show_bodies, show_links);
+	void Kinematics::draw(QPainter& painter, const QPointF& origin, float scale, bool show_linkage) const {
+		diagram.draw(painter, origin, scale, show_linkage);
 	}
 
 	void Kinematics::speedUp() {
@@ -169,14 +167,6 @@ namespace kinematics {
 
 	void Kinematics::invertSpeed() {
 		simulation_speed = -simulation_speed;
-	}
-
-	void Kinematics::showLinks(bool flag) {
-		show_links = flag;
-	}
-
-	void Kinematics::showBodies(bool flag) {
-		show_bodies = flag;
 	}
 
 }

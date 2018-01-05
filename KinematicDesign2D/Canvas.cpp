@@ -37,6 +37,7 @@ namespace canvas {
 		show_solutions = false;
 		show_grid_lines = true;
 		show_input_poses = true;
+		show_linkage = true;
 
 		selectedJoint = std::make_pair(-1, -1);
 		linkage_type = LINKAGE_4R;
@@ -243,6 +244,12 @@ namespace canvas {
 		design.save(filename);
 	}
 
+	void Canvas::saveImage(const QString& filename) {
+		QPixmap pixmap(size());
+		render(&pixmap);
+		pixmap.save(filename);
+	}
+
 	void Canvas::run() {
 		if (animation_timer == NULL) {
 			animation_timer = new QTimer(this);
@@ -316,20 +323,6 @@ namespace canvas {
 			}
 			update();
 		}
-	}
-
-	void Canvas::showLinks(bool flag) {
-		for (int i = 0; i < kinematics.size(); i++) {
-			kinematics[i].showLinks(flag);
-		}
-		update();
-	}
-
-	void Canvas::showBodies(bool flag) {
-		for (int i = 0; i < kinematics.size(); i++) {
-			kinematics[i].showBodies(flag);
-		}
-		update();
 	}
 
 	glm::dvec2 Canvas::screenToWorldCoordinates(const glm::dvec2& p) {
@@ -645,7 +638,7 @@ namespace canvas {
 
 			// draw 2D mechanism
 			for (int i = 0; i < kinematics.size(); i++) {
-				kinematics[i].draw(painter, origin, scale);
+				kinematics[i].draw(painter, origin, scale, show_linkage);
 			}
 		}
 

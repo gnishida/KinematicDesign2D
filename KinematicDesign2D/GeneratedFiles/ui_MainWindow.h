@@ -73,6 +73,8 @@ public:
     QAction *actionShowGridLines;
     QAction *actionShowInputPoses;
     QAction *actionResetPosition;
+    QAction *actionSaveImage;
+    QAction *actionShowLinkage;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -281,6 +283,12 @@ public:
         QIcon icon24;
         icon24.addFile(QStringLiteral("Resources/reset.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionResetPosition->setIcon(icon24);
+        actionSaveImage = new QAction(MainWindowClass);
+        actionSaveImage->setObjectName(QStringLiteral("actionSaveImage"));
+        actionShowLinkage = new QAction(MainWindowClass);
+        actionShowLinkage->setObjectName(QStringLiteral("actionShowLinkage"));
+        actionShowLinkage->setCheckable(true);
+        actionShowLinkage->setChecked(true);
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -320,6 +328,8 @@ public:
         menuFile->addAction(actionNew);
         menuFile->addAction(actionOpen);
         menuFile->addAction(actionSave);
+        menuFile->addSeparator();
+        menuFile->addAction(actionSaveImage);
         menuFile->addSeparator();
         menuFile->addAction(actionExit);
         menuTool->addAction(actionGenerate4RLinkage);
@@ -366,6 +376,7 @@ public:
         menuView->addAction(actionShowSolutions);
         menuView->addAction(actionShowGridLines);
         menuView->addAction(actionShowInputPoses);
+        menuView->addAction(actionShowLinkage);
 
         retranslateUi(MainWindowClass);
 
@@ -433,6 +444,9 @@ public:
         actionShowGridLines->setText(QApplication::translate("MainWindowClass", "Show Grid Lines", 0));
         actionShowInputPoses->setText(QApplication::translate("MainWindowClass", "Show Input Poses", 0));
         actionResetPosition->setText(QApplication::translate("MainWindowClass", "Reset Position", 0));
+        actionSaveImage->setText(QApplication::translate("MainWindowClass", "Save Image", 0));
+        actionSaveImage->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+P", 0));
+        actionShowLinkage->setText(QApplication::translate("MainWindowClass", "Show Linkage", 0));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "File", 0));
         menuTool->setTitle(QApplication::translate("MainWindowClass", "Kinematics", 0));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "Mode", 0));

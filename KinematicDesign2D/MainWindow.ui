@@ -31,6 +31,8 @@
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="separator"/>
+    <addaction name="actionSaveImage"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuTool">
@@ -111,6 +113,7 @@
     <addaction name="actionShowSolutions"/>
     <addaction name="actionShowGridLines"/>
     <addaction name="actionShowInputPoses"/>
+    <addaction name="actionShowLinkage"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -557,6 +560,25 @@
    </property>
    <property name="text">
     <string>Reset Position</string>
+   </property>
+  </action>
+  <action name="actionSaveImage">
+   <property name="text">
+    <string>Save Image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionShowLinkage">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Linkage</string>
    </property>
   </action>
  </widget>

@@ -19,8 +19,6 @@ namespace kinematics {
 		KinematicDiagram diagram;
 		KinematicDiagram diagram_original;
 		double simulation_speed;
-		bool show_links;
-		bool show_bodies;
 
 	public:
 		Kinematics(double simulation_speed = 0.02);
@@ -33,12 +31,10 @@ namespace kinematics {
 		void forwardKinematics(bool collision_check);
 		void stepForward(bool collision_check, bool need_recovery_for_collision = true);
 		void stepBackward(bool collision_check, bool need_recovery_for_collision = true);
-		void draw(QPainter& painter, const QPointF& origin, float scale) const;
+		void draw(QPainter& painter, const QPointF& origin, float scale, bool show_linkage) const;
 		void speedUp();
 		void speedDown();
 		void invertSpeed();
-		void showLinks(bool flag);
-		void showBodies(bool flag);
 	};
 
 }

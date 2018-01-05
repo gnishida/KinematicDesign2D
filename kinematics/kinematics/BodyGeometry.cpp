@@ -59,13 +59,14 @@ namespace kinematics {
 		return actual_points;
 	}
 
-	void BodyGeometry::draw(QPainter& painter, const QPointF& origin, float scale) {
+	void BodyGeometry::draw(QPainter& painter, const QPointF& origin, float scale, bool show_connector) {
 		painter.save();
 
 		painter.setPen(QPen(QColor(0, 0, 0), 1));
 		painter.setBrush(QBrush(QColor(0, 255, 0, 60)));
 		std::vector<std::vector<glm::dvec2>> actual_points = getActualPoints();
 		for (int i = 0; i < actual_points.size(); i++) {
+			if (i > 0 && !show_connector) continue;
 			QPolygonF pts;
 			for (int k = 0; k < actual_points[i].size(); ++k) {
 				pts.push_back(QPointF(origin.x() + actual_points[i][k].x * scale, origin.y() - actual_points[i][k].y * scale));

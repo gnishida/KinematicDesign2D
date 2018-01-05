@@ -29,6 +29,7 @@ public slots:
 	void onNew();
 	void onOpen();
 	void onSave();
+	void onSaveImage();
 	void onUndo();
 	void onRedo();
 	void onCopy();
@@ -54,6 +55,7 @@ public slots:
 	void onShowSolutions();
 	void onShowGridLines();
 	void onShowInputPoses();
+	void onShowLinkage();
 };
 
 #endif // MAINWINDOW_H
