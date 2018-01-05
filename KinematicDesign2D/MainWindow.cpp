@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	connect(ui.actionShowSolutions, SIGNAL(triggered()), this, SLOT(onShowSolutions()));
 	connect(ui.actionShowGridLines, SIGNAL(triggered()), this, SLOT(onShowGridLines()));
 	connect(ui.actionShowInputPoses, SIGNAL(triggered()), this, SLOT(onShowInputPoses()));
+	connect(ui.actionShowLinkage, SIGNAL(triggered()), this, SLOT(onShowLinkage()));
 
 	// create tool bar for file menu
 	ui.mainToolBar->addAction(ui.actionNew);
