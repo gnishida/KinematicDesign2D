@@ -327,7 +327,7 @@ namespace kinematics {
 			}
 			catch (char* ex) {
 				double dist;
-				closest_point = kinematics::closestOffsetPoint(moving_body, joint->pos, dist);
+				closest_point = kinematics::closestPoint(moving_body, joint->pos, dist);
 			}
 
 			// Create the base of the connecting part
