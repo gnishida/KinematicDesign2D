@@ -13,6 +13,5 @@
 #include "kinematics/LinkageSynthesis.h"
 #include "kinematics/LinkageSynthesis4R.h"
 #include "kinematics/LinkageSynthesisRRRP.h"
-#include "kinematics/LinkageSynthesisWattI.h"
 #include "kinematics/LeastSquareSolver.h"
 #include "kinematics/Solution.h"

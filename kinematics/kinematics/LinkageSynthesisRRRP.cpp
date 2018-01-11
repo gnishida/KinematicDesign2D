@@ -26,55 +26,44 @@ namespace kinematics {
 	* @param solutions1	the output solutions for the driving crank, each of which contains a pair of the center point and the circle point
 	* @param solutions2	the output solutions for the follower, each of which contains a pair of the fixed point and the slider point
 	*/
-	void LinkageSynthesisRRRP::calculateSolution(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, int num_samples, const Object25D& moving_body, std::vector<Solution>& solutions, std::vector<glm::dvec2>& enlarged_linkage_region_pts) {
+	void LinkageSynthesisRRRP::calculateSolution(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, int num_samples, const Object25D& moving_body, std::vector<Solution>& solutions) {
 		solutions.clear();
 
 		srand(0);
 
-		// calculate the center of the valid regions
-		BBox bbox = boundingBox(linkage_region_pts);
-		glm::dvec2 bbox_center = bbox.center();
-
 		int cnt = 0;
-		for (int scale = 1; scale <= 3 && cnt == 0; scale++) {
-			// calculate the enlarged linkage region for the sampling region
-			enlarged_linkage_region_pts.clear();
-			for (int i = 0; i < linkage_region_pts.size(); i++) {
-				enlarged_linkage_region_pts.push_back((linkage_region_pts[i] - bbox_center) * (double)scale + bbox_center);
-			}
 
-			// calculate the bounding boxe of the valid regions
-			BBox enlarged_bbox = boundingBox(enlarged_linkage_region_pts);
+		// calculate the bounding boxe of the valid regions
+		BBox bbox = boundingBox(linkage_region_pts);
 
-			for (int iter = 0; iter < num_samples && cnt < num_samples; iter++) {
-				printf("\rsampling %d/%d", cnt, (scale - 1) * num_samples + iter + 1);
+		for (int iter = 0; iter < num_samples && cnt < num_samples; iter++) {
+			printf("\rsampling %d/%d", cnt, num_samples + iter + 1);
 
-				// perturbe the poses a little
-				double position_error = 0.0;
-				double orientation_error = 0.0;
-				std::vector<glm::dmat3x3> perturbed_poses = perturbPoses(poses, sigmas, position_error, orientation_error);
+			// perturbe the poses a little
+			double position_error = 0.0;
+			double orientation_error = 0.0;
+			std::vector<glm::dmat3x3> perturbed_poses = perturbPoses(poses, sigmas, position_error, orientation_error);
 
-				// sample joints within the linkage region
-				std::vector<glm::dvec2> points(5);
-				for (int i = 0; i < points.size(); i++) {
-					while (true) {
-						points[i] = glm::dvec2(genRand(enlarged_bbox.minPt.x, enlarged_bbox.maxPt.x), genRand(enlarged_bbox.minPt.y, enlarged_bbox.maxPt.y));
-						if (withinPolygon(enlarged_linkage_region_pts, points[i])) break;
-					}
+			// sample joints within the linkage region
+			std::vector<glm::dvec2> points(5);
+			for (int i = 0; i < points.size(); i++) {
+				while (true) {
+					points[i] = glm::dvec2(genRand(bbox.minPt.x, bbox.maxPt.x), genRand(bbox.minPt.y, bbox.maxPt.y));
+					if (withinPolygon(linkage_region_pts, points[i])) break;
 				}
-
-				// HACK: this indicates that the positions of the joint are random
-				//       for the particle filter, the initial joints are used to optimize, so we want to differentiate these two cases.
-				//points[1] = points[3];
-
-				if (!optimizeCandidate(perturbed_poses, enlarged_linkage_region_pts, enlarged_bbox, points)) continue;
-
-				// check hard constraints
-				if (!checkHardConstraints(points, perturbed_poses, enlarged_linkage_region_pts, linkage_avoidance_pts, moving_body)) continue;
-
-				solutions.push_back(Solution(points, position_error, orientation_error, perturbed_poses));
-				cnt++;
 			}
+
+			// HACK: this indicates that the positions of the joint are random
+			//       for the particle filter, the initial joints are used to optimize, so we want to differentiate these two cases.
+			//points[1] = points[3];
+
+			if (!optimizeCandidate(perturbed_poses, linkage_region_pts, bbox, points)) continue;
+
+			// check hard constraints
+			if (!checkHardConstraints(points, perturbed_poses, linkage_region_pts, linkage_avoidance_pts, moving_body)) continue;
+
+			solutions.push_back(Solution(1, points, position_error, orientation_error, perturbed_poses));
+			cnt++;
 		}
 		printf("\n");
 	}
@@ -225,7 +214,7 @@ namespace kinematics {
 			return solutions[0];
 		}
 		else {
-			return Solution({ { 0, 0 }, { 0, 2 }, { 2, 0 }, { 2, 2 }, { 4, 2 } }, 0, 0, poses);
+			return Solution(1, { { 0, 0 }, { 0, 2 }, { 2, 0 }, { 2, 2 }, { 4, 2 } }, 0, 0, poses);
 		}
 	}
 

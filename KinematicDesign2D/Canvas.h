@@ -21,7 +21,7 @@ namespace canvas {
 
 	public:
 		static enum { MODE_SELECT = 0, MODE_MOVE, MODE_ROTATION, MODE_RESIZE, MODE_FIXED_RECTANGLE, MODE_FIXED_CIRCLE, MODE_FIXED_POLYGON, MODE_MOVING_RECTANGLE, MODE_MOVING_CIRCLE, MODE_MOVING_POLYGON, MODE_LINKAGE_REGION, MODE_LINKAGE_AVOIDANCE, MODE_KINEMATICS };
-		static enum { LINKAGE_4R = 0, LINKAGE_RRRP, LINKAGE_WATT_I };
+		static enum { LINKAGE_4R = 1, LINKAGE_RRRP = 2 };
 
 	public:
 		MainWindow* mainWin;
@@ -36,7 +36,7 @@ namespace canvas {
 		canvas::Design design;
 		History history;
 		
-		boost::shared_ptr<kinematics::LinkageSynthesis> synthesis;
+		std::vector<boost::shared_ptr<kinematics::LinkageSynthesis>> synthesis;
 
 		std::vector<kinematics::Kinematics> kinematics;
 		std::vector<kinematics::Solution> selected_solutions; // currently selected solution
@@ -67,7 +67,6 @@ namespace canvas {
 		void redo();
 		void copySelectedShapes();
 		void pasteCopiedShapes();
-		void circularRepeat(int num_repeat);
 		void setMode(int mode);
 		void addLayer();
 		void insertLayer();

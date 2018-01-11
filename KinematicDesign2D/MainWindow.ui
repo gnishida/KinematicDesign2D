@@ -39,9 +39,7 @@
     <property name="title">
      <string>Kinematics</string>
     </property>
-    <addaction name="actionGenerate4RLinkage"/>
-    <addaction name="actionGenerateSliderCrank"/>
-    <addaction name="actionGenerateWattI"/>
+    <addaction name="actionGenerateLinkage"/>
     <addaction name="separator"/>
     <addaction name="actionRun"/>
     <addaction name="actionRunBackward"/>
@@ -103,8 +101,6 @@
     <addaction name="separator"/>
     <addaction name="actionDelete"/>
     <addaction name="actionSelectAll"/>
-    <addaction name="separator"/>
-    <addaction name="actionCircularRepeat"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -298,13 +294,13 @@
     <string>Layer 3</string>
    </property>
   </action>
-  <action name="actionGenerate4RLinkage">
+  <action name="actionGenerateLinkage">
    <property name="icon">
     <iconset>
      <normaloff>Resources/fourbar_linkage.png</normaloff>Resources/fourbar_linkage.png</iconset>
    </property>
    <property name="text">
-    <string>Generate 4R Linkage</string>
+    <string>Generate Linkage</string>
    </property>
   </action>
   <action name="actionCollisionCheck">

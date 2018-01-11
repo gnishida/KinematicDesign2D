@@ -36,15 +36,12 @@ public slots:
 	void onPaste();
 	void onDelete();
 	void onSelectAll();
-	void onCircularRepeat();
 	void onModeChanged();
 	void onAddLayer();
 	void onInsertLayer();
 	void onDeleteLayer();
 	void onLayerChanged();
-	void onGenerate4RLinkage();
-	void onGenerateSliderCrank();
-	void onGenerateWattI();
+	void onGenerateLinkage();
 	void onRun();
 	void onRunBackward();
 	void onStop();

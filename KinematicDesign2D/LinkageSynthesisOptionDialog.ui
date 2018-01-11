@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>352</width>
-    <height>625</height>
+    <height>651</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>10</y>
+     <y>40</y>
      <width>61</width>
      <height>21</height>
     </rect>
@@ -30,7 +30,7 @@
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>10</y>
+     <y>40</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -40,7 +40,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>260</y>
+     <y>290</y>
      <width>251</width>
      <height>17</height>
     </rect>
@@ -53,7 +53,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>300</y>
+     <y>330</y>
      <width>131</width>
      <height>17</height>
     </rect>
@@ -66,7 +66,7 @@
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>580</y>
+     <y>600</y>
      <width>91</width>
      <height>31</height>
     </rect>
@@ -79,7 +79,7 @@
    <property name="geometry">
     <rect>
      <x>200</x>
-     <y>580</y>
+     <y>600</y>
      <width>91</width>
      <height>31</height>
     </rect>
@@ -92,7 +92,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>40</y>
+     <y>70</y>
      <width>311</width>
      <height>211</height>
     </rect>
@@ -282,7 +282,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>330</y>
+     <y>360</y>
      <width>311</width>
      <height>131</height>
     </rect>
@@ -410,7 +410,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>470</y>
+     <y>500</y>
      <width>311</width>
      <height>91</height>
     </rect>
@@ -482,7 +482,7 @@
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>280</y>
+     <y>310</y>
      <width>101</width>
      <height>20</height>
     </rect>
@@ -492,13 +492,39 @@
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>280</y>
+     <y>310</y>
      <width>141</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
     <string>Min. transmission angle:</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox4RLinkage">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>10</y>
+     <width>121</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>4R four-bar linkage</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBoxSliderCrank">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>10</y>
+     <width>121</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Slider crank</string>
    </property>
   </widget>
  </widget>

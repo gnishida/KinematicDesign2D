@@ -111,72 +111,6 @@ namespace canvas {
 		update();
 	}
 
-	/**
-	 *
-	 */
-	void Canvas::circularRepeat(int num_repeat) {
-		/*
-		int N = layers[0].shapes.size();
-		for (int i = 0; i < N; i++) {
-			if (layers[0].shapes[i]->getSubType() == Shape::TYPE_BODY) {
-				glm::dmat3x3 mat0 = layers[0].shapes[i]->getModelMatrix();
-
-				bool moved = false;
-				for (int j = 0; j < layers.size(); j++) {
-					glm::dmat3x3 mat = layers[j].shapes[i]->getModelMatrix();
-					if (mat != mat0) {
-						moved = true;
-						break;
-					}
-				}
-
-				if (!moved) continue;
-			}
-
-			if (layers[0].shapes[i]->getSubType() == Shape::TYPE_BODY) {
-				for (int j = 0; j < layers.size(); j++) {
-					for (int k = 1; k < num_repeat; k++) {
-						double theta = (double)k / num_repeat * 2 * 3.1415926535;
-
-						// copy the shape
-						boost::shared_ptr<Shape> shape = layers[j].shapes[i]->clone();
-
-						// calculate the bounding box
-						BoundingBox bbox = shape->boundingBox();
-
-						// transform the shape
-						glm::dvec2 offset = shape->worldCoordinate(bbox.center());
-						shape->translate(-offset);
-						shape->rotate(theta);
-						shape->translate(glm::dvec2(offset.x * cos(theta) - offset.y * sin(theta), offset.x * sin(theta) + offset.y * cos(theta)));
-
-						layers[j].shapes.push_back(shape);
-					}
-				}
-			}
-			else if (layers[0].shapes[i]->getSubType() == Shape::TYPE_LINKAGE_REGION) {
-				for (int k = 1; k < num_repeat; k++) {
-					double theta = (double)k / num_repeat * 2 * 3.1415926535;
-
-					// copy the shape
-					boost::shared_ptr<Shape> shape = layers[0].shapes[i]->clone();
-
-					// calculate the bounding box
-					BoundingBox bbox = shape->boundingBox();
-
-					// transform the shape
-					glm::dvec2 offset = shape->worldCoordinate(bbox.center());
-					shape->translate(-offset);
-					shape->rotate(theta);
-					shape->translate(glm::dvec2(offset.x * cos(theta) - offset.y * sin(theta), offset.x * sin(theta) + offset.y * cos(theta)));
-
-					layers[0].shapes.push_back(shape);
-				}
-			}
-		}
-		*/
-	}
-
 	void Canvas::setMode(int mode) {
 		if (this->mode != mode) {
 			this->mode = mode;
@@ -414,18 +348,17 @@ namespace canvas {
 		}
 
 		kinematics.clear();
+		synthesis.clear();
+		synthesis.resize(2);
 
-		if (linkage_type == LINKAGE_4R) {
-			synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesis4R(merged_fixed_bodies, sigmas, rotatable_crank, avoid_branch_defect, min_transmission_angle, 1.0, weights));
+		if (linkage_type & LINKAGE_4R) {
+			synthesis[0] = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesis4R(merged_fixed_bodies, sigmas, rotatable_crank, avoid_branch_defect, min_transmission_angle, 1.0, weights));
 		}
-		else if (linkage_type == LINKAGE_RRRP) {
-			synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisRRRP(merged_fixed_bodies, sigmas, rotatable_crank, avoid_branch_defect, min_transmission_angle, 1.0, weights));
-		}
-		else if (linkage_type == LINKAGE_WATT_I) {
-			synthesis = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisWattI(merged_fixed_bodies, sigmas, rotatable_crank, avoid_branch_defect, min_transmission_angle, 1.0, weights));
+		if (linkage_type & LINKAGE_RRRP) {
+			synthesis[1] = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisRRRP(merged_fixed_bodies, sigmas, rotatable_crank, avoid_branch_defect, min_transmission_angle, 1.0, weights));
 		}
 
-		solutions.resize(moving_bodies.size());
+		solutions.resize(moving_bodies.size(), {});
 		selected_solutions.resize(moving_bodies.size());
 		for (int i = 0; i < moving_bodies.size(); i++) {
 			time_t start = clock();
@@ -433,16 +366,36 @@ namespace canvas {
 			// calculate a distance mapt for the linkage region
 			cv::Mat dist_map;
 			kinematics::BBox dist_map_bbox;
-			synthesis->createDistanceMapForLinkageRegion(linkage_region_pts[i], 5, dist_map_bbox, dist_map);
-			
-			// calculate the circle point curve and center point curve
+			kinematics::LinkageSynthesis::createDistanceMapForLinkageRegion(linkage_region_pts[i], 5, dist_map_bbox, dist_map);
+
+			std::vector<std::vector<kinematics::Solution>> current_solutions(2);
+
+			// calculate the center of the valid regions
+			kinematics::BBox bbox = kinematics::boundingBox(linkage_region_pts[i]);
+			glm::dvec2 bbox_center = bbox.center();
+
 			std::vector<glm::dvec2> enlarged_linkage_region_pts;
-			synthesis->calculateSolution(poses[i], linkage_region_pts[i], linkage_avoidance_pts[i], num_samples, moving_bodies[i], solutions[i], enlarged_linkage_region_pts);
+
+			int cnt = 0;
+			for (int scale = 1; scale <= 3 && cnt == 0; scale++) {
+				// calculate the enlarged linkage region for the sampling region
+				enlarged_linkage_region_pts = kinematics::LinkageSynthesis::enlargePolygon(linkage_region_pts[i], bbox_center, scale);
+
+				// calculate the bounding boxe of the valid regions
+				kinematics::BBox enlarged_bbox = kinematics::boundingBox(enlarged_linkage_region_pts);
+
+				// calculate the circle point curve and center point curve
+				for (int j = 0; j < synthesis.size(); j++) {
+					if (!synthesis[j]) continue;
+					synthesis[j]->calculateSolution(poses[i], enlarged_linkage_region_pts, linkage_avoidance_pts[i], num_samples, moving_bodies[i], current_solutions[j]);
+					cnt += current_solutions[j].size();
+				}
+			}
 
 			time_t end = clock();
-			std::cout << "Elapsed: " << (double)(end - start) / CLOCKS_PER_SEC << " sec for obtaining " << solutions[i].size() << " candidates." << std::endl;
+			std::cout << "Elapsed: " << (double)(end - start) / CLOCKS_PER_SEC << " sec for obtaining " << cnt << " candidates." << std::endl;
 
-			if (solutions[i].size() == 0) {
+			if (cnt == 0) {
 				mainWin->ui.statusBar->showMessage("No candidate was found.");
 			}
 			else {
@@ -451,10 +404,21 @@ namespace canvas {
 
 			start = clock();
 
-			selected_solutions[i] = synthesis->findBestSolution(poses[i], solutions[i], enlarged_linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts[i], moving_bodies[i], num_particles, num_iterations, record_file);
-			std::vector<glm::dvec2> connector_pts;
-			kinematics::Kinematics kin = synthesis->constructKinematics(selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
+			kinematics::Kinematics kin;
+			selected_solutions[i].cost = std::numeric_limits<double>::max();
+			for (int j = 0; j < synthesis.size(); j++) {
+				if (current_solutions[j].size() == 0) continue;
 
+				kinematics::Solution solution = synthesis[j]->findBestSolution(poses[i], current_solutions[j], enlarged_linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts[i], moving_bodies[i], num_particles, num_iterations, record_file);
+				if (solution.cost < selected_solutions[i].cost) {
+					selected_solutions[i] = solution;
+				}
+
+				solutions[i].insert(solutions[i].end(), current_solutions[j].begin(), current_solutions[j].end());
+			}
+
+			std::vector<glm::dvec2> connector_pts;
+			kin = synthesis[selected_solutions[i].linkage_type]->constructKinematics(selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
 			kinematics.push_back(kin);
 
 			end = clock();
@@ -483,29 +447,13 @@ namespace canvas {
 	* Construct a kinematic diagram based on the selected solution.
 	*/
 	void Canvas::constructKinematics() {
-		// the points of the modified linkage
-		std::vector<glm::dvec2> points;
-		if (selectedJoint.first >= 0 && selectedJoint.first < kinematics.size()) {
-			points.resize(kinematics[selectedJoint.first].diagram.joints.size());
-			for (int i = 0; i < kinematics[selectedJoint.first].diagram.joints.size(); i++) {
-				points[i] = kinematics[selectedJoint.first].diagram.joints[i]->pos;
-			}
-		}
-
 		kinematics.clear();
 
 		// construct kinamtics
 		for (int i = 0; i < selected_solutions.size(); i++) {
 			std::vector<glm::dvec2> connector_pts;
-			if (i == selectedJoint.first) {
-				// for the currently editing linkage, use the modified points
-				kinematics::Kinematics kin = synthesis->constructKinematics(points, moving_bodies[i], true, fixed_bodies, connector_pts);
-				kinematics.push_back(kin);
-			}
-			else {
-				kinematics::Kinematics kin = synthesis->constructKinematics(selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
-				kinematics.push_back(kin);
-			}
+			kinematics::Kinematics kin = synthesis[selected_solutions[i].linkage_type]->constructKinematics(selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
+			kinematics.push_back(kin);
 		}
 
 		// setup the kinematic system
@@ -608,15 +556,12 @@ namespace canvas {
 			// draw solutions
 			if (show_solutions && selectedJoint.first >= 0) {
 				int linkage_id = selectedJoint.first;
-				painter.setPen(QPen(QColor(255, 128, 128, 64), 1));
-				painter.setBrush(QBrush(QColor(255, 128, 128, 64)));
-				for (int i = 0; i < solutions[linkage_id].size(); i++) {
-					painter.drawEllipse(origin.x() + solutions[linkage_id][i].points[0].x * scale, origin.y() - solutions[linkage_id][i].points[0].y * scale, 3, 3);
-				}
 				painter.setPen(QPen(QColor(128, 128, 255, 64), 1));
 				painter.setBrush(QBrush(QColor(128, 128, 255, 64)));
 				for (int i = 0; i < solutions[linkage_id].size(); i++) {
-					painter.drawEllipse(origin.x() + solutions[linkage_id][i].points[1].x * scale, origin.y() - solutions[linkage_id][i].points[1].y * scale, 3, 3);
+					if (selectedJoint.second < solutions[linkage_id][i].points.size()) {
+						painter.drawEllipse(origin.x() + solutions[linkage_id][i].points[selectedJoint.second].x * scale, origin.y() - solutions[linkage_id][i].points[selectedJoint.second].y * scale, 3, 3);
+					}
 				}
 			}
 
@@ -730,7 +675,6 @@ namespace canvas {
 				double min_dist = 2;
 				for (int i = 0; i < kinematics.size(); i++) {
 					for (int j = 0; j < kinematics[i].diagram.joints.size(); j++) {
-						if (ctrlPressed && j >= 2) continue;
 						double dist = glm::length(kinematics[i].diagram.joints[j]->pos - pt);
 						if (dist < min_dist) {
 							min_dist = dist;
@@ -793,37 +737,12 @@ namespace canvas {
 				if (selectedJoint.first >= 0) {
 					int linkage_id = selectedJoint.first;
 					int joint_id = selectedJoint.second;
+
+					// select a solution
 					glm::dvec2 pt = screenToWorldCoordinates(e->x(), e->y());
-
-					if (!ctrlPressed) {
-						// move the selected joint
-						kinematics[linkage_id].diagram.joints[joint_id]->pos = pt;
-					}
-					else {
-						// select a solution
-						glm::dvec2 pt = screenToWorldCoordinates(e->x(), e->y());
-						int selectedSolution = findSolution(solutions[linkage_id], pt, joint_id);
-
-						if (selectedSolution >= 0) {
-							selected_solutions[linkage_id] = solutions[linkage_id][selectedSolution];
-
-							// move the joints according to the selected solution
-							for (int i = 0; i < solutions[linkage_id][selectedSolution].points.size(); i++) {
-								kinematics[linkage_id].diagram.joints[i]->pos = solutions[linkage_id][selectedSolution].points[i];
-							}
-
-							// move the other linkages back to the first pose
-							for (int i = 0; i < kinematics.size(); i++) {
-								if (i == linkage_id) continue;
-
-								int selectedSolution = findSolution(solutions[i], kinematics[i].diagram.joints[0]->pos, 0);
-								if (selectedSolution >= 0) {
-									for (int j = 0; j < solutions[i][selectedSolution].points.size(); j++) {
-										kinematics[i].diagram.joints[j]->pos = solutions[i][selectedSolution].points[j];
-									}
-								}
-							}
-						}
+					int selectedSolution = findSolution(solutions[linkage_id], pt, joint_id);
+					if (selectedSolution >= 0) {
+						selected_solutions[linkage_id] = solutions[linkage_id][selectedSolution];
 					}
 
 					// update the geometry

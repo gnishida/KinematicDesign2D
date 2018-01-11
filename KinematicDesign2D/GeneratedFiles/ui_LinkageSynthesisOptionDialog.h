@@ -67,33 +67,35 @@ public:
     QCheckBox *checkBoxRecordFile;
     QLineEdit *lineEditMinTransmissionAngle;
     QLabel *label_18;
+    QCheckBox *checkBox4RLinkage;
+    QCheckBox *checkBoxSliderCrank;
 
     void setupUi(QDialog *LinkageSynthesisOptionDialog)
     {
         if (LinkageSynthesisOptionDialog->objectName().isEmpty())
             LinkageSynthesisOptionDialog->setObjectName(QStringLiteral("LinkageSynthesisOptionDialog"));
-        LinkageSynthesisOptionDialog->resize(352, 625);
+        LinkageSynthesisOptionDialog->resize(352, 651);
         label = new QLabel(LinkageSynthesisOptionDialog);
         label->setObjectName(QStringLiteral("label"));
-        label->setGeometry(QRect(30, 10, 61, 21));
+        label->setGeometry(QRect(30, 40, 61, 21));
         lineEditNumSamples = new QLineEdit(LinkageSynthesisOptionDialog);
         lineEditNumSamples->setObjectName(QStringLiteral("lineEditNumSamples"));
-        lineEditNumSamples->setGeometry(QRect(220, 10, 101, 20));
+        lineEditNumSamples->setGeometry(QRect(220, 40, 101, 20));
         checkBoxAvoidBranchDefect = new QCheckBox(LinkageSynthesisOptionDialog);
         checkBoxAvoidBranchDefect->setObjectName(QStringLiteral("checkBoxAvoidBranchDefect"));
-        checkBoxAvoidBranchDefect->setGeometry(QRect(30, 260, 251, 17));
+        checkBoxAvoidBranchDefect->setGeometry(QRect(30, 290, 251, 17));
         checkBoxRotatableCrank = new QCheckBox(LinkageSynthesisOptionDialog);
         checkBoxRotatableCrank->setObjectName(QStringLiteral("checkBoxRotatableCrank"));
-        checkBoxRotatableCrank->setGeometry(QRect(30, 300, 131, 17));
+        checkBoxRotatableCrank->setGeometry(QRect(30, 330, 131, 17));
         pushButtonOK = new QPushButton(LinkageSynthesisOptionDialog);
         pushButtonOK->setObjectName(QStringLiteral("pushButtonOK"));
-        pushButtonOK->setGeometry(QRect(60, 580, 91, 31));
+        pushButtonOK->setGeometry(QRect(60, 600, 91, 31));
         pushButtonCancel = new QPushButton(LinkageSynthesisOptionDialog);
         pushButtonCancel->setObjectName(QStringLiteral("pushButtonCancel"));
-        pushButtonCancel->setGeometry(QRect(200, 580, 91, 31));
+        pushButtonCancel->setGeometry(QRect(200, 600, 91, 31));
         groupBox = new QGroupBox(LinkageSynthesisOptionDialog);
         groupBox->setObjectName(QStringLiteral("groupBox"));
-        groupBox->setGeometry(QRect(20, 40, 311, 211));
+        groupBox->setGeometry(QRect(20, 70, 311, 211));
         label_2 = new QLabel(groupBox);
         label_2->setObjectName(QStringLiteral("label_2"));
         label_2->setGeometry(QRect(50, 40, 131, 21));
@@ -141,7 +143,7 @@ public:
         lineEditStdDevOrientationLast->setGeometry(QRect(200, 180, 101, 20));
         groupBox_2 = new QGroupBox(LinkageSynthesisOptionDialog);
         groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
-        groupBox_2->setGeometry(QRect(20, 330, 311, 131));
+        groupBox_2->setGeometry(QRect(20, 360, 311, 131));
         label_3 = new QLabel(groupBox_2);
         label_3->setObjectName(QStringLiteral("label_3"));
         label_3->setGeometry(QRect(20, 20, 111, 21));
@@ -174,7 +176,7 @@ public:
         lineEditLinkageLocationWeight->setGeometry(QRect(200, 60, 101, 20));
         groupBox_3 = new QGroupBox(LinkageSynthesisOptionDialog);
         groupBox_3->setObjectName(QStringLiteral("groupBox_3"));
-        groupBox_3->setGeometry(QRect(20, 470, 311, 91));
+        groupBox_3->setGeometry(QRect(20, 500, 311, 91));
         label_16 = new QLabel(groupBox_3);
         label_16->setObjectName(QStringLiteral("label_16"));
         label_16->setGeometry(QRect(20, 20, 111, 21));
@@ -192,10 +194,16 @@ public:
         checkBoxRecordFile->setGeometry(QRect(20, 60, 191, 21));
         lineEditMinTransmissionAngle = new QLineEdit(LinkageSynthesisOptionDialog);
         lineEditMinTransmissionAngle->setObjectName(QStringLiteral("lineEditMinTransmissionAngle"));
-        lineEditMinTransmissionAngle->setGeometry(QRect(220, 280, 101, 20));
+        lineEditMinTransmissionAngle->setGeometry(QRect(220, 310, 101, 20));
         label_18 = new QLabel(LinkageSynthesisOptionDialog);
         label_18->setObjectName(QStringLiteral("label_18"));
-        label_18->setGeometry(QRect(70, 280, 141, 16));
+        label_18->setGeometry(QRect(70, 310, 141, 16));
+        checkBox4RLinkage = new QCheckBox(LinkageSynthesisOptionDialog);
+        checkBox4RLinkage->setObjectName(QStringLiteral("checkBox4RLinkage"));
+        checkBox4RLinkage->setGeometry(QRect(30, 10, 121, 17));
+        checkBoxSliderCrank = new QCheckBox(LinkageSynthesisOptionDialog);
+        checkBoxSliderCrank->setObjectName(QStringLiteral("checkBoxSliderCrank"));
+        checkBoxSliderCrank->setGeometry(QRect(170, 10, 121, 17));
 
         retranslateUi(LinkageSynthesisOptionDialog);
 
@@ -231,6 +239,8 @@ public:
         label_17->setText(QApplication::translate("LinkageSynthesisOptionDialog", "#iterations:", 0));
         checkBoxRecordFile->setText(QApplication::translate("LinkageSynthesisOptionDialog", "Record cost evolution to a file", 0));
         label_18->setText(QApplication::translate("LinkageSynthesisOptionDialog", "Min. transmission angle:", 0));
+        checkBox4RLinkage->setText(QApplication::translate("LinkageSynthesisOptionDialog", "4R four-bar linkage", 0));
+        checkBoxSliderCrank->setText(QApplication::translate("LinkageSynthesisOptionDialog", "Slider crank", 0));
     } // retranslateUi
 
 };

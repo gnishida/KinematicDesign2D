@@ -43,7 +43,7 @@ public:
     QAction *actionSave;
     QAction *actionKinematics;
     QAction *actionLayer3;
-    QAction *actionGenerate4RLinkage;
+    QAction *actionGenerateLinkage;
     QAction *actionCollisionCheck;
     QAction *actionUndo;
     QAction *actionRedo;
@@ -166,11 +166,11 @@ public:
         actionLayer3 = new QAction(MainWindowClass);
         actionLayer3->setObjectName(QStringLiteral("actionLayer3"));
         actionLayer3->setCheckable(true);
-        actionGenerate4RLinkage = new QAction(MainWindowClass);
-        actionGenerate4RLinkage->setObjectName(QStringLiteral("actionGenerate4RLinkage"));
+        actionGenerateLinkage = new QAction(MainWindowClass);
+        actionGenerateLinkage->setObjectName(QStringLiteral("actionGenerateLinkage"));
         QIcon icon10;
         icon10.addFile(QStringLiteral("Resources/fourbar_linkage.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionGenerate4RLinkage->setIcon(icon10);
+        actionGenerateLinkage->setIcon(icon10);
         actionCollisionCheck = new QAction(MainWindowClass);
         actionCollisionCheck->setObjectName(QStringLiteral("actionCollisionCheck"));
         actionCollisionCheck->setCheckable(true);
@@ -332,9 +332,7 @@ public:
         menuFile->addAction(actionSaveImage);
         menuFile->addSeparator();
         menuFile->addAction(actionExit);
-        menuTool->addAction(actionGenerate4RLinkage);
-        menuTool->addAction(actionGenerateSliderCrank);
-        menuTool->addAction(actionGenerateWattI);
+        menuTool->addAction(actionGenerateLinkage);
         menuTool->addSeparator();
         menuTool->addAction(actionRun);
         menuTool->addAction(actionRunBackward);
@@ -371,8 +369,6 @@ public:
         menuEdit->addSeparator();
         menuEdit->addAction(actionDelete);
         menuEdit->addAction(actionSelectAll);
-        menuEdit->addSeparator();
-        menuEdit->addAction(actionCircularRepeat);
         menuView->addAction(actionShowSolutions);
         menuView->addAction(actionShowGridLines);
         menuView->addAction(actionShowInputPoses);
@@ -408,7 +404,7 @@ public:
         actionSave->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+S", 0));
         actionKinematics->setText(QApplication::translate("MainWindowClass", "Kinematics", 0));
         actionLayer3->setText(QApplication::translate("MainWindowClass", "Layer 3", 0));
-        actionGenerate4RLinkage->setText(QApplication::translate("MainWindowClass", "Generate 4R Linkage", 0));
+        actionGenerateLinkage->setText(QApplication::translate("MainWindowClass", "Generate Linkage", 0));
         actionCollisionCheck->setText(QApplication::translate("MainWindowClass", "Collision Check", 0));
         actionUndo->setText(QApplication::translate("MainWindowClass", "Undo", 0));
         actionUndo->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+Z", 0));
