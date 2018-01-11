@@ -3,6 +3,7 @@
 #include "LinkageSynthesisOptionDialog.h"
 #include <vector>
 #include <QDateTime>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 	ui.setupUi(this);
@@ -265,6 +266,13 @@ void MainWindow::onGenerateLinkage() {
 		int linkage_type = 0;
 		if (dlg.ui.checkBox4RLinkage->isChecked()) linkage_type |= 1;
 		if (dlg.ui.checkBoxSliderCrank->isChecked()) linkage_type |= 2;
+		if (linkage_type == 0) {
+			QMessageBox msg(this);
+			msg.setWindowTitle("Error");
+			msg.setText("Please select at least one linkage type.");
+			msg.exec();
+			return;
+		}
 
 		std::vector<std::pair<double, double>> sigmas = {
 			std::make_pair(dlg.ui.lineEditStdDevPositionFirst->text().toDouble(), dlg.ui.lineEditStdDevOrientationFirst->text().toDouble()),

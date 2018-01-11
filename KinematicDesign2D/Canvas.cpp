@@ -407,7 +407,7 @@ namespace canvas {
 			kinematics::Kinematics kin;
 			selected_solutions[i].cost = std::numeric_limits<double>::max();
 			for (int j = 0; j < synthesis.size(); j++) {
-				if (current_solutions[j].size() == 0) continue;
+				if (!synthesis[j]) continue;
 
 				kinematics::Solution solution = synthesis[j]->findBestSolution(poses[i], current_solutions[j], enlarged_linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts[i], moving_bodies[i], num_particles, num_iterations, record_file);
 				if (solution.cost < selected_solutions[i].cost) {
