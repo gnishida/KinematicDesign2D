@@ -37,7 +37,7 @@ namespace kinematics {
 		BBox bbox = boundingBox(linkage_region_pts);
 
 		for (int iter = 0; iter < num_samples && cnt < num_samples; iter++) {
-			printf("\rsampling %d/%d", cnt, num_samples + iter + 1);
+			printf("\rsampling %d/%d", cnt, iter + 1);
 
 			// perturbe the poses a little
 			double position_error = 0.0;
