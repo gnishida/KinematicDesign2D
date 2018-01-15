@@ -358,7 +358,9 @@ namespace canvas {
 			synthesis[1] = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisRRRP(merged_fixed_bodies, sigmas, rotatable_crank, avoid_branch_defect, min_transmission_angle, 1.0, weights));
 		}
 
+		solutions.clear();
 		solutions.resize(moving_bodies.size(), {});
+		selected_solutions.clear();
 		selected_solutions.resize(moving_bodies.size());
 		for (int i = 0; i < moving_bodies.size(); i++) {
 			time_t start = clock();
