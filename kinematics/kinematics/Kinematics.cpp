@@ -13,6 +13,8 @@ namespace kinematics {
 
 	Kinematics::Kinematics(double simulation_speed) {
 		this->simulation_speed = simulation_speed;
+		min_angle = 0;
+		max_angle = 0;
 	}
 
 	void Kinematics::clear() {
@@ -75,7 +77,7 @@ namespace kinematics {
 	* @param need_recovery_for_collision
 	*                           true - when collision occurs, recover the state right before the collision
 	*/
-	void Kinematics::stepForward(bool collision_check, bool need_recovery_for_collision) {
+	void Kinematics::stepForward(bool collision_check, bool need_recovery_for_collision, bool motion_range_restricted) {
 		// save the current state
 		KinematicDiagram prev_state;
 		if (need_recovery_for_collision) {
@@ -101,6 +103,15 @@ namespace kinematics {
 			}
 		}
 
+		// check the crank angle
+		if (motion_range_restricted && min_angle < max_angle) {
+			glm::dvec2 a = diagram.joints[2]->pos - diagram.joints[0]->pos;
+			double angle = std::atan2(a.y, a.x);
+			if (angle < min_angle) angle += M_PI * 2;
+			else if (angle > max_angle) angle -= M_PI * 2;
+			if (angle < min_angle - 0.01 || angle > max_angle + 0.01) throw "Out of motion range";
+		}
+
 		if (driver_exist) {
 			try {
 				forwardKinematics(collision_check);
@@ -114,7 +125,7 @@ namespace kinematics {
 		}
 	}
 
-	void Kinematics::stepBackward(bool collision_check, bool need_recovery_for_collision) {
+	void Kinematics::stepBackward(bool collision_check, bool need_recovery_for_collision, bool motion_range_restricted) {
 		// save the current state
 		KinematicDiagram prev_state;
 		if (need_recovery_for_collision) {
@@ -138,6 +149,15 @@ namespace kinematics {
 				driver_exist = true;
 				diagram.joints[it.key()]->stepForward(-simulation_speed);
 			}
+		}
+
+		// check the crank angle
+		if (motion_range_restricted && min_angle < max_angle) {
+			glm::dvec2 a = diagram.joints[2]->pos - diagram.joints[0]->pos;
+			double angle = std::atan2(a.y, a.x);
+			if (angle < min_angle) angle += M_PI * 2;
+			else if (angle > max_angle) angle -= M_PI * 2;
+			if (angle < min_angle - 0.01 || angle > max_angle + 0.01) throw "Out of motion range";
 		}
 
 		if (driver_exist) {

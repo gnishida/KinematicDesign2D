@@ -47,6 +47,7 @@ namespace canvas {
 		int linkage_type;
 		QTimer* animation_timer;
 		bool collision_check;
+		bool restrict_motion_range;
 		bool show_solutions;
 		bool show_grid_lines;
 		bool show_input_poses;

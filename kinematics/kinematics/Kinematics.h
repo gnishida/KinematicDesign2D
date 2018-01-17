@@ -19,6 +19,8 @@ namespace kinematics {
 		KinematicDiagram diagram;
 		KinematicDiagram diagram_original;
 		double simulation_speed;
+		double min_angle;
+		double max_angle;
 
 	public:
 		Kinematics(double simulation_speed = 0.02);
@@ -29,8 +31,8 @@ namespace kinematics {
 		void initialize();
 		void reset();
 		void forwardKinematics(bool collision_check);
-		void stepForward(bool collision_check, bool need_recovery_for_collision = true);
-		void stepBackward(bool collision_check, bool need_recovery_for_collision = true);
+		void stepForward(bool collision_check, bool need_recovery_for_collision = true, bool motion_range_restricted = false);
+		void stepBackward(bool collision_check, bool need_recovery_for_collision = true, bool motion_range_restricted = false);
 		void draw(QPainter& painter, const QPointF& origin, float scale, bool show_linkage) const;
 		void speedUp();
 		void speedDown();

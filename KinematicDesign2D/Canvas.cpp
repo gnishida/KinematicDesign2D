@@ -34,6 +34,7 @@ namespace canvas {
 
 		animation_timer = NULL;
 		collision_check = true;
+		restrict_motion_range = true;
 		show_solutions = false;
 		show_grid_lines = true;
 		show_input_poses = true;
@@ -420,7 +421,7 @@ namespace canvas {
 			}
 
 			std::vector<glm::dvec2> connector_pts;
-			kin = synthesis[selected_solutions[i].linkage_type]->constructKinematics(selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
+			kin = synthesis[selected_solutions[i].linkage_type]->constructKinematics(selected_solutions[i].poses, selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
 			kinematics.push_back(kin);
 
 			end = clock();
@@ -454,7 +455,7 @@ namespace canvas {
 		// construct kinamtics
 		for (int i = 0; i < selected_solutions.size(); i++) {
 			std::vector<glm::dvec2> connector_pts;
-			kinematics::Kinematics kin = synthesis[selected_solutions[i].linkage_type]->constructKinematics(selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
+			kinematics::Kinematics kin = synthesis[selected_solutions[i].linkage_type]->constructKinematics(selected_solutions[i].poses, selected_solutions[i].points, moving_bodies[i], true, fixed_bodies, connector_pts);
 			kinematics.push_back(kin);
 		}
 
@@ -489,7 +490,7 @@ namespace canvas {
 	void Canvas::animation_update() {
 		for (int i = 0; i < kinematics.size(); i++) {
 			try {
-				kinematics[i].stepForward(collision_check);
+				kinematics[i].stepForward(collision_check, true, restrict_motion_range);
 			}
 			catch (char* ex) {
 				kinematics[i].invertSpeed();

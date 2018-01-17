@@ -75,6 +75,7 @@ public:
     QAction *actionResetPosition;
     QAction *actionSaveImage;
     QAction *actionShowLinkage;
+    QAction *actionRestrictMotionRange;
     QWidget *centralWidget;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -289,6 +290,10 @@ public:
         actionShowLinkage->setObjectName(QStringLiteral("actionShowLinkage"));
         actionShowLinkage->setCheckable(true);
         actionShowLinkage->setChecked(true);
+        actionRestrictMotionRange = new QAction(MainWindowClass);
+        actionRestrictMotionRange->setObjectName(QStringLiteral("actionRestrictMotionRange"));
+        actionRestrictMotionRange->setCheckable(true);
+        actionRestrictMotionRange->setChecked(true);
         centralWidget = new QWidget(MainWindowClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         MainWindowClass->setCentralWidget(centralWidget);
@@ -343,6 +348,7 @@ public:
         menuTool->addAction(actionStepBackward);
         menuTool->addSeparator();
         menuTool->addAction(actionCollisionCheck);
+        menuTool->addAction(actionRestrictMotionRange);
         menuMode->addAction(actionSelect);
         menuMode->addAction(menuFixed_Body->menuAction());
         menuMode->addAction(menuMoving_Body->menuAction());
@@ -443,6 +449,7 @@ public:
         actionSaveImage->setText(QApplication::translate("MainWindowClass", "Save Image", 0));
         actionSaveImage->setShortcut(QApplication::translate("MainWindowClass", "Ctrl+P", 0));
         actionShowLinkage->setText(QApplication::translate("MainWindowClass", "Show Linkage", 0));
+        actionRestrictMotionRange->setText(QApplication::translate("MainWindowClass", "Restrict Motion Range", 0));
         menuFile->setTitle(QApplication::translate("MainWindowClass", "File", 0));
         menuTool->setTitle(QApplication::translate("MainWindowClass", "Kinematics", 0));
         menuMode->setTitle(QApplication::translate("MainWindowClass", "Mode", 0));

@@ -50,6 +50,7 @@
     <addaction name="actionStepBackward"/>
     <addaction name="separator"/>
     <addaction name="actionCollisionCheck"/>
+    <addaction name="actionRestrictMotionRange"/>
    </widget>
    <widget class="QMenu" name="menuMode">
     <property name="title">
@@ -575,6 +576,17 @@
    </property>
    <property name="text">
     <string>Show Linkage</string>
+   </property>
+  </action>
+  <action name="actionRestrictMotionRange">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Restrict Motion Range</string>
    </property>
   </action>
  </widget>
