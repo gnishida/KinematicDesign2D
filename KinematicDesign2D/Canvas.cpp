@@ -284,7 +284,7 @@ namespace canvas {
 	}
 
 
-	void Canvas::calculateSolutions(int linkage_type, int num_samples, std::vector<std::pair<double, double>>& sigmas, bool avoid_branch_defect, double min_transmission_angle, bool rotatable_crank, const std::vector<double>& weights, int num_particles, int num_iterations, bool record_file) {
+	void Canvas::calculateSolutions(int linkage_type, int num_samples, std::vector<std::pair<double, double>>& sigmas, bool avoid_branch_defect, double min_transmission_angle, const std::vector<double>& weights, int num_particles, int num_iterations, bool record_file) {
 		mainWin->ui.statusBar->showMessage("Please wait for a moment...");
 		
 		// change the mode to kinematics
@@ -352,10 +352,10 @@ namespace canvas {
 		synthesis.resize(2);
 
 		if (linkage_type & LINKAGE_4R) {
-			synthesis[0] = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesis4R(merged_fixed_bodies, sigmas, rotatable_crank, avoid_branch_defect, min_transmission_angle, 1.0, weights));
+			synthesis[0] = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesis4R(merged_fixed_bodies, sigmas, avoid_branch_defect, min_transmission_angle, 1.0, weights));
 		}
 		if (linkage_type & LINKAGE_RRRP) {
-			synthesis[1] = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisRRRP(merged_fixed_bodies, sigmas, rotatable_crank, avoid_branch_defect, min_transmission_angle, 1.0, weights));
+			synthesis[1] = boost::shared_ptr<kinematics::LinkageSynthesis>(new kinematics::LinkageSynthesisRRRP(merged_fixed_bodies, sigmas, avoid_branch_defect, min_transmission_angle, 1.0, weights));
 		}
 
 		solutions.clear();
