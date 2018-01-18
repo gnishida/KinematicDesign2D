@@ -29,7 +29,7 @@ namespace kinematics {
 		static std::vector<glm::dvec2> enlargePolygon(const std::vector<glm::dvec2>& polygon, const glm::dvec2& center, double scale);
 		static void createDistanceMapForLinkageRegion(const std::vector<glm::dvec2>& linkage_region_pts, double scale, BBox& dist_map_bbox, cv::Mat& dist_map);
 		void particleFilter(std::vector<Solution>& solutions, const std::vector<glm::dvec2>& linkage_region_pts, const cv::Mat& dist_map, const BBox& dist_map_bbox, const std::vector<glm::dvec2>& linkage_avoidance_pts, const Object25D& moving_body, int num_particles, int num_iterations, bool record_file);
-		void resample(const std::vector<Solution>& particles, int N, std::vector<Solution>& resampled_particles, double max_cost);
+		void resample(std::vector<Solution> particles, int N, std::vector<Solution>& resampled_particles, double max_cost);
 
 		virtual void calculateSolution(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const std::vector<glm::dvec2>& linkage_avoidance_pts, int num_samples, const Object25D& moving_body, std::vector<Solution>& solutions) = 0;
 		virtual bool optimizeCandidate(const std::vector<glm::dmat3x3>& poses, const std::vector<glm::dvec2>& linkage_region_pts, const BBox& bbox, std::vector<glm::dvec2>& points) = 0;

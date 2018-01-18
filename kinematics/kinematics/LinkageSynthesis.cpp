@@ -220,7 +220,7 @@ namespace kinematics {
 	* @param resampled_particles	new resmapled particles
 	* @param max_cost				maximum cost, which is used to normalized the cost for calculating the weight
 	*/
-	void LinkageSynthesis::resample(const std::vector<Solution>& particles, int N, std::vector<Solution>& resampled_particles, double max_cost) {
+	void LinkageSynthesis::resample(std::vector<Solution> particles, int N, std::vector<Solution>& resampled_particles, double max_cost) {
 		// calculate the weights of particles
 		int best_index = -1;
 		double min_cost = std::numeric_limits<double>::max();
