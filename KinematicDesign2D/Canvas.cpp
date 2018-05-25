@@ -614,6 +614,8 @@ namespace canvas {
 	}
 
 	void Canvas::mousePressEvent(QMouseEvent* e) {
+		ctrlPressed = e->modifiers() & Qt::ControlModifier;
+
 		// This is necessary to get key event occured even after the user selects a menu.
 		setFocus();
 
