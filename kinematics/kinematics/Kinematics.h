@@ -23,7 +23,7 @@ namespace kinematics {
 		double max_angle;
 
 	public:
-		Kinematics(double simulation_speed = 0.02);
+		Kinematics(double simulation_speed = 0.005);
 
 		void clear();
 		void load(const QString& filename);

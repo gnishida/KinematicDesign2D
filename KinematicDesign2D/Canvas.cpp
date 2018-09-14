@@ -425,7 +425,7 @@ namespace canvas {
 			for (int j = 0; j < synthesis.size(); j++) {
 				if (!synthesis[j]) continue;
 
-				kinematics::Solution solution = synthesis[j]->findBestSolution(poses[i], current_solutions[j], enlarged_linkage_region_pts, dist_map, dist_map_bbox, linkage_avoidance_pts[i], moving_bodies[i], num_particles, num_iterations, record_file);
+				kinematics::Solution solution = synthesis[j]->findBestSolution(poses[i], current_solutions[j], dist_map, dist_map_bbox, linkage_avoidance_pts[i], moving_bodies[i], num_particles, num_iterations, record_file);
 				if (solution.cost < selected_solutions[i].cost) {
 					selected_solutions[i] = solution;
 				}

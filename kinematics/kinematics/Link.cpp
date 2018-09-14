@@ -90,18 +90,15 @@ namespace kinematics {
 	}
 
 	void Link::draw(QPainter& painter, const QPointF& origin, float scale) {
+		if (!actual_link) return;
+
 		painter.save();
 
 		if (driver) {
 			painter.setPen(QPen(QColor(0, 0, 0), 3));
 		}
 		else {
-			if (actual_link) {
-				painter.setPen(QPen(QColor(90, 90, 90), 3));
-			}
-			else {
-				painter.setPen(QPen(QColor(150, 150, 150), 3, Qt::DotLine));
-			}
+			painter.setPen(QPen(QColor(90, 90, 90), 3));
 		}
 
 		if (joints.size() == 2) {

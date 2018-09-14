@@ -32,9 +32,9 @@ namespace kinematics {
 		orientation_error = 0.0;
 
 		for (int i = 1; i < perturbed_poses.size() - 1; i++) {
-			double e1 = genNormal(0, sigmas.first);
-			double e2 = genNormal(0, sigmas.first);
-			double delta_theta = genNormal(0, sigmas.second);
+			double e1 = genRand(-sigmas.first, sigmas.first);
+			double e2 = genRand(-sigmas.first, sigmas.first);
+			double delta_theta = genRand(-sigmas.second, sigmas.second);
 
 			perturbed_poses[i][2][0] += e1;
 			perturbed_poses[i][2][1] += e2;
@@ -95,19 +95,11 @@ namespace kinematics {
 		dist_map.convertTo(dist_map, CV_64F);
 	}
 
-	void LinkageSynthesis::particleFilter(std::vector<Solution>& solutions, const std::vector<glm::dvec2>& linkage_region_pts, const cv::Mat& dist_map, const BBox& dist_map_bbox, const std::vector<glm::dvec2>& linkage_avoidance_pts, const Object25D& moving_body, int num_particles, int num_iterations, bool record_file) {
-		BBox linkage_region_bbox = boundingBox(linkage_region_pts);
-
+	void LinkageSynthesis::particleFilter(const std::vector<glm::dmat3x3>& poses, std::vector<Solution>& solutions, const cv::Mat& dist_map, const BBox& dist_map_bbox, const std::vector<glm::dvec2>& linkage_avoidance_pts, const Object25D& moving_body, int num_particles, int num_iterations, bool record_file) {
 		std::vector<Solution> particles(std::max((int)solutions.size(), num_particles));
 		double max_cost = 0;
 
-		/*
-		for (int i = 0; i < solutions.size(); i++) {
-			double cost = calculateCost(solutions[i], moving_body, dist_map, dist_map_bbox);
-			max_cost = std::max(max_cost, cost);
-			particles[i] = Particle(cost, solutions[i]);
-		}
-		*/
+		srand(0);
 
 		// augment
 		for (int i = 0; i < particles.size(); i++) {
@@ -136,20 +128,25 @@ namespace kinematics {
 			(*out) << mean_val << "," << sd_val << "\n";
 		}
 
+		double perturb_size = 1;
+
 		// particle filter
 		for (int iter = 0; iter < num_iterations; iter++) {
 			// perturb the particles and calculate its score
 			std::vector<Solution> new_particles = particles;
 			for (int i = 0; i < new_particles.size(); i++) {
+				// perturbe the poses a little
+				new_particles[i].poses = perturbPoses(poses, sigmas, new_particles[i].position_error, new_particles[i].orientation_error);
+
 				// pertube the joints
 				for (int j = 0; j < new_particles[i].points.size(); j++) {
-					new_particles[i].points[j].x += genRand(-1, 1);
-					new_particles[i].points[j].y += genRand(-1, 1);
+					new_particles[i].points[j].x += genRand(-perturb_size, perturb_size);
+					new_particles[i].points[j].y += genRand(-perturb_size, perturb_size);
 				}
 
-				if (optimizeCandidate(new_particles[i].poses, linkage_region_pts, linkage_region_bbox, new_particles[i].points)) {
+				if (optimizeCandidate(new_particles[i].poses, new_particles[i].points)) {
 					// check the hard constraints
-					if (checkHardConstraints(new_particles[i].points, new_particles[i].poses, linkage_region_pts, linkage_avoidance_pts, moving_body)) {
+					if (checkHardConstraints(new_particles[i].points, new_particles[i].poses, linkage_avoidance_pts, moving_body)) {
 						// calculate the score
 						new_particles[i].cost = calculateCost(new_particles[i], moving_body, dist_map, dist_map_bbox);
 					}
@@ -206,8 +203,10 @@ namespace kinematics {
 	* @param max_cost				maximum cost, which is used to normalized the cost for calculating the weight
 	*/
 	void LinkageSynthesis::resample(std::vector<Solution> particles, int N, std::vector<Solution>& resampled_particles, double max_cost) {
+		// sort the particles based on the costs
+		sort(particles.begin(), particles.end(), compare);
+
 		// calculate the weights of particles
-		int best_index = -1;
 		double min_cost = std::numeric_limits<double>::max();
 		std::vector<double> weights(particles.size());
 		double weight_total = 0.0;
@@ -218,10 +217,6 @@ namespace kinematics {
 			}
 			else {
 				w = std::exp(-particles[i].cost / max_cost * 20);
-				if (particles[i].cost < min_cost) {
-					min_cost = particles[i].cost;
-					best_index = i;
-				}
 			}
 
 			if (i == 0) {
@@ -238,8 +233,11 @@ namespace kinematics {
 
 		// resample the particles based on their weights
 		resampled_particles.resize(N);
-		resampled_particles[0] = particles[best_index];
-		for (int i = 1; i < N; i++) {
+		int M = N * 0.1;
+		for (int i = 0; i < M; i++) {
+			resampled_particles[i] = particles[i];
+		}
+		for (int i = M; i < N; i++) {
 			double r = genRand();
 			auto it = std::lower_bound(weights.begin(), weights.end(), r);
 			int index = it - weights.begin();
